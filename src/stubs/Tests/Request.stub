@@ -1,0 +1,84 @@
+<?php
+
+namespace Tests\Unit\Http\Clients\{{ client }}\Requests;
+
+use Tests\TestCase;
+use Illuminate\Http\Response;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
+use App\Http\Clients\{{ client }}\Responses\BadResponse;
+use App\Http\Clients\{{ client }}\Requests\{{ name }}Request;
+use App\Http\Clients\{{ client }}\Responses\{{ name }}Response;
+use App\Http\Clients\{{ client }}\Attributes\SaveInboundWebhookAttribute;
+
+#[CoversClass({{ name }}Request::class)]
+class {{ name }}RequestTest extends TestCase
+{
+    /** @var {{ name }}Attribute */
+    public $attributes;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Http::preventStrayRequests();
+
+        $this->attributes = new {{ name }}Attribute(
+
+        );
+    }
+
+    #[Test]
+    public function send_successful(): void
+    {
+        Http::fake([
+            "" => Http::response(
+                [],
+                Response::
+            ),
+        ]);
+
+        ${{ name }}Request = app({{ name }}Request::class);
+
+        $this->assertInstanceOf(
+            {{ name }}Response::class,
+            ${{ name }}Request->send('api-key', $this->webhookId, $this->attributes)
+        );
+
+        Http::assertSentInOrder([function (Request $request) {
+            $this->assertSame(
+                "",
+                $request->url()
+            );
+
+            $this->assertSame('', $request->method());
+
+            $this->assertSame([], $request->data());
+
+            return true;
+        },
+        ]);
+    }
+
+    #[Test]
+    public function send_bad(): void
+    {
+        Http::fake([
+            "" => Http::response(
+                ['message' => 'invalid', 'code' => Response::HTTP_BAD_REQUEST],
+                Response::HTTP_BAD_REQUEST
+            ),
+        ]);
+
+        ${{ name }}Request = app({{ name }}Request::class);
+
+        $this->assertInstanceOf(
+            BadResponse::class,
+            ${{ name }}Request->send('api-key', $this->webhookId, $this->attributes)
+        );
+
+        Http::assertSentCount(1);
+    }
+}

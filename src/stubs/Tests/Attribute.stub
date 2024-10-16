@@ -1,0 +1,18 @@
+<?php
+
+namespace Tests\Unit\Http\Clients\{{ client }}\Attributes;
+
+use App\Http\Clients\{{ client }}\Attributes\{{ name }}Attribute;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+
+#[CoversClass({{ name }}Attribute::class)]
+class {{ name }}AttributeTest extends TestCase
+{
+    #[Test]
+    public function to_array(): void
+    {
+
+    }
+}

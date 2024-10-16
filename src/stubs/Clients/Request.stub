@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Http\Clients\{{ client }}\Requests;
+
+use App\Http\Clients\{{ client }}\Attributes\{{ name }}Attribute;
+use App\Http\Clients\{{ client }}\Responses\BadResponse;
+use App\Http\Clients\{{ client }}\Responses\{{ name }}Response;
+use Illuminate\Http\Client\Factory;
+use Illuminate\Http\Response;
+
+class {{ name }}Request
+{
+    public function __construct(public Factory $client) {}
+
+    public function send({{ name }}Attribute $attribute): BadResponse|{{ name }}Response
+    {
+        // $response = $this->client->post('users/create', $attribute->toArray());
+
+        if ($response->status() === Response::HTTP_NO_CONTENT) {
+            return {{ name }}Response::fromResponse($response);
+        }
+
+        return BadResponse::fromResponse($response);
+    }
+}

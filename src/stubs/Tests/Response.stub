@@ -1,0 +1,47 @@
+<?php
+
+namespace Tests\Unit\Http\Clients\{{ client }}\Responses;
+
+use Illuminate\Http\Response;
+use App\Http\Clients\HasStatus;
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use GuzzleHttp\Psr7\Response as Psr7Response;
+use PHPUnit\Framework\Attributes\CoversClass;
+use App\Http\Clients\{{ client }}\Responses\{{ name }}Response;
+use Illuminate\Http\Client\Response as ClientResponse;
+
+#[CoversClass({{ name }}Response::class)]
+class {{ name }}ResponseTest extends TestCase
+{
+    /** @var ClientResponse */
+    public $response;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $psr7Response = new Psr7Response(
+            status: Response::HTTP_CREATED,
+            body: json_encode(/* */)
+        );
+
+        $this->response = new ClientResponse($psr7Response);
+    }
+
+    #[Test]
+    public function from_response(): void
+    {
+        $createResponse = {{ name }}Response::fromResponse($this->response);
+
+        $this->assertSame(/* Response::HTTP_CREATED */, $createResponse->status);
+
+        $this->assertSame($this->response, $createResponse->original);
+    }
+
+    #[Test]
+    public function asset_class_has_has_status_trait(): void
+    {
+        $this->assertContains(HasStatus::class, class_uses({{ name }}Response::class));
+    }
+}

@@ -1,0 +1,58 @@
+<?php
+
+namespace Tests\Unit\Http\Clients\{{ client }}\Responses;
+
+use Illuminate\Http\Response;
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+use GuzzleHttp\Psr7\Response as Psr7Response;
+use PHPUnit\Framework\Attributes\CoversClass;
+use App\Http\Clients\Brevo\Responses\BadResponse;
+use Illuminate\Http\Client\Response as ClientResponse;
+
+#[CoversClass(BadResponse::class)]
+class BadResponseTest extends TestCase
+{
+    /** @var ClientResponse */
+    public $response;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $psr7Response = new Psr7Response(
+            status: Response::HTTP_BAD_REQUEST,
+            body: json_encode(['message' => 'invalid', 'code' => 'bad request'])
+        );
+
+        $this->response = new ClientResponse($psr7Response);
+    }
+
+    #[Test]
+    public function from_response(): void
+    {
+        $badResponse = BadResponse::fromResponse($this->response);
+
+        $this->assertSame('invalid', $badResponse->error);
+
+        $this->assertSame('bad request', $badResponse->code);
+
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $badResponse->status);
+    }
+
+    #[Test]
+    public function success(): void
+    {
+        $badResponse = BadResponse::fromResponse($this->response);
+
+        $this->assertFalse($badResponse->success());
+    }
+
+    #[Test]
+    public function bad(): void
+    {
+        $badResponse = BadResponse::fromResponse($this->response);
+
+        $this->assertTrue($badResponse->bad());
+    }
+}

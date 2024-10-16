@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Http\Clients\{{ client }}\Attributes;
+
+class {{ name }}Attribute
+{
+    public function __construct(
+        /* protected string $title, */
+    ) {}
+
+    public function toArray(): array
+    {
+        return [
+            'title' => $this->title,
+        ];
+    }
+}

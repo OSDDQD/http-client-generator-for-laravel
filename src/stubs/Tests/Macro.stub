@@ -1,0 +1,63 @@
+<?php
+
+namespace Tests\Unit\Http\Clients\{{ client }};
+
+use Tests\TestCase;
+use ReflectionClass;
+use Illuminate\Support\Facades\Http;
+use App\Http\Clients\{{ client }}\{{ client }}Macro;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\CoversClass;
+
+#[CoversClass({{ client }}Macro::class)]
+class {{ client }}MacroTest extends TestCase
+{
+    /** @var PendingRequest */
+    public $pendingRequest;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Http::preventStrayRequests();
+
+        $this->pendingRequest = Http::{{ method }}()->dump();
+    }
+
+    #[Test]
+    public function assert_http_client_has_{{ method }}_method(): void
+    {
+        $this->assertTrue(Http::hasMacro('{{ method }}'));
+    }
+
+    #[Test]
+    public function assert_accept_header_is_set(): void
+    {
+        $this->assertSame('application/json', $this->pendingRequest->getOptions()['headers']['accept']);
+    }
+
+    #[Test]
+    public function assert_content_type_header_is_set(): void
+    {
+        $this->assertSame('application/json', $this->pendingRequest->getOptions()['headers']['content-type']);
+    }
+
+    #[Test]
+    public function assert_user_agent_header_is_set(): void
+    {
+        $this->assertSame(/* */, $this->pendingRequest->getOptions()['headers']['User-Agent']);
+    }
+
+    #[Test]
+    public function assert_base_url_is_set(): void
+    {
+        $pendingRequest = Http::{{ method }}()->dump();
+
+        $reflectionClass = new ReflectionClass($pendingRequest);
+        $baseUrl = $reflectionClass->getProperty('baseUrl');
+
+        $baseUrl->setAccessible(true);
+
+        $this->assertSame(/* */, $baseUrl->getValue($pendingRequest));
+    }
+}

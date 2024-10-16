@@ -1,0 +1,48 @@
+{
+    "name": "jcergolj/http-client-generator-for-laravel",
+    "description": "command for generating http client request attributes, requests and responses",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Janez Cergolj",
+            "email": "me@jcergolj.me.uk"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "laravel/prompts": "^0.3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jcergolj\\HttpClientGenerator\\": "src/"
+        }
+    },
+    "scripts": {
+        "pint": "vendor/bin/pint",
+        "tlint": "tlint",
+        "analyse": [
+            "@pint",
+            "@tlint"
+        ],
+        "test": [
+            "@php vendor/bin/phpunit"
+        ]
+    },
+    "require-dev": {
+        "laravel/pint": "^1.9",
+        "tightenco/tlint": "^9.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jcergolj\\HttpClientGenerator\\HttpClientGeneratorServiceProvider"
+            ]
+        }
+    }
+}
