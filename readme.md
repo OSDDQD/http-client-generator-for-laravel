@@ -4,7 +4,7 @@ This package generates classes for Laravel Http client.
 
 #### Installation
 ```bash
-composer require jcergolj/jcergolj/http-client-generator-for-laravel --dev
+composer require jcergolj/http-client-generator-for-laravel --dev
 ```
 
 ### Example of usage
