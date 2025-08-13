@@ -1,6 +1,6 @@
 <?php
 
-namespace Jcergolj\HttpClientGenerator\Console\Commands;
+namespace Osddqd\HttpClientGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;

@@ -1,21 +1,38 @@
 {
-    "name": "jcergolj/http-client-generator-for-laravel",
-    "description": "command for generating http client request attributes, requests and responses",
+    "name": "osddqd/http-client-generator-for-laravel",
+    "description": "Enhanced HTTP Client Generator for Laravel with custom namespace and path support",
     "license": "MIT",
     "authors": [
+        {
+            "name": "OSDDQD",
+            "email": "osddqd@users.noreply.github.com"
+        },
         {
             "name": "Janez Cergolj",
             "email": "me@jcergolj.me.uk"
         }
     ],
+    "keywords": ["laravel", "http-client", "generator", "artisan", "command"],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": "^8.1",
+        "laravel/framework": "^10.0|^11.0|^12.0",
         "laravel/prompts": "^0.3.1"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.9",
+        "tightenco/tlint": "^9.1",
+        "phpunit/phpunit": "^10.0"
     },
     "autoload": {
         "psr-4": {
-            "Jcergolj\\HttpClientGenerator\\": "src/"
+            "Osddqd\\HttpClientGenerator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Osddqd\\HttpClientGenerator\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -29,10 +46,6 @@
             "@php vendor/bin/phpunit"
         ]
     },
-    "require-dev": {
-        "laravel/pint": "^1.9",
-        "tightenco/tlint": "^9.1"
-    },
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
@@ -41,7 +54,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Jcergolj\\HttpClientGenerator\\HttpClientGeneratorServiceProvider"
+                "Osddqd\\HttpClientGenerator\\HttpClientGeneratorServiceProvider"
             ]
         }
     }

@@ -1,14 +1,19 @@
 <?php
 
-namespace Jcergolj\HttpClientGenerator\Console\Commands;
+namespace Osddqd\HttpClientGenerator\Console\Commands;
 
 use function Laravel\Prompts\text;
 
 class CreateAttributeStubsCommand extends AppCommand
 {
-    protected $signature = 'http-client-generator:attribute {client?} {name?}';
+    protected $signature = 'http-client-generator:attribute 
+        {client?} 
+        {name?}
+        {--namespace= : Custom base namespace}
+        {--path= : Custom base path}
+        {--tests-path= : Custom tests path}';
 
-    protected $description = 'Command for generating request attributes';
+    protected $description = 'Command for generating request attributes with custom namespace and path support';
 
     public function handle()
     {
@@ -27,7 +32,6 @@ class CreateAttributeStubsCommand extends AppCommand
         );
 
         $this->createClassStub($client, $name, 'Attribute');
-
         $this->createTestStub($client, $name, 'Attribute');
     }
 }

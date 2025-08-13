@@ -1,6 +1,6 @@
 <?php
 
-namespace Jcergolj\HttpClientGenerator\Concerns;
+namespace Osddqd\HttpClientGenerator\Concerns;
 
 use Illuminate\Http\Client\Response;
 

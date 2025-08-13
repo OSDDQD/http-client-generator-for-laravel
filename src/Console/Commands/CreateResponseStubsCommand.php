@@ -1,14 +1,19 @@
 <?php
 
-namespace Jcergolj\HttpClientGenerator\Console\Commands;
+namespace Osddqd\HttpClientGenerator\Console\Commands;
 
 use function Laravel\Prompts\text;
 
 class CreateResponseStubsCommand extends AppCommand
 {
-    protected $signature = 'http-client-generator:response  {client?} {name?}';
+    protected $signature = 'http-client-generator:response 
+        {client?} 
+        {name?}
+        {--namespace= : Custom base namespace}
+        {--path= : Custom base path}
+        {--tests-path= : Custom tests path}';
 
-    protected $description = 'Command for generating request response';
+    protected $description = 'Command for generating response classes with custom namespace and path support';
 
     public function handle()
     {
@@ -20,14 +25,13 @@ class CreateResponseStubsCommand extends AppCommand
         );
 
         $name = $this->argument('name') ?? text(
-            label: 'What is name of the attribute?',
+            label: 'What is name of the response?',
             placeholder: 'FetchOne, FetchAll, Create',
-            hint: 'This will be the name e.g. CreateAttribute, FetchOneAttribute',
-            validate: ['requestName' => 'required|max:50']
+            hint: 'This will be the name e.g. CreateResponse, FetchOneResponse',
+            validate: ['responseName' => 'required|max:50']
         );
 
         $this->createClassStub($client, $name, 'Response');
-
         $this->createTestStub($client, $name, 'Response');
     }
 }
