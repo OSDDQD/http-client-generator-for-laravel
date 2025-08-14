@@ -19,15 +19,14 @@ class CreateClientMacroStubsCommand extends Command
             label: 'What is the client\'s name?',
             placeholder: 'Trello, Twitter, Linkedin',
             hint: 'This will be the folder name e.g Http\Clients\Twitter\\',
-            validate: ['clientName' => 'required|max:50']
+            validate: ['clientName' => 'required|max:50'],
         );
 
         $this->createMacro($clientName);
         $this->createMacroTest($clientName);
 
-        $this->info(
-            "Add to AppServiceProvider inside boot method Illuminate\Support\Facades\Http::mixin(new App\Http\Clients\{$clientName}\{$clientName}Macro);"
-        );
+        $this->info("✅ {$clientName}Macro has been created and will be automatically registered!");
+        $this->line("🔄 The macro will be available after the next application restart or cache clear.");
     }
 
     protected function createMacro($client)
@@ -38,7 +37,7 @@ class CreateClientMacroStubsCommand extends Command
             return;
         }
 
-        $file = file_get_contents(__DIR__.'../../../stubs/Clients/Macro.stub');
+        $file = file_get_contents(__DIR__ . '../../../stubs/Clients/Macro.stub');
 
         $newStub = Str::of($file)->replace(['{{ client }}', '{{ method }}'], [$client, strtolower($client)])->toString();
 
@@ -62,7 +61,7 @@ class CreateClientMacroStubsCommand extends Command
             return;
         }
 
-        $file = file_get_contents(__DIR__.'../../../stubs/Tests/Macro.stub');
+        $file = file_get_contents(__DIR__ . '../../../stubs/Tests/Macro.stub');
 
         $newStub = Str::of($file)->replace(['{{ client }}', '{{ method }}'], [$client, strtolower($client)])->toString();
 

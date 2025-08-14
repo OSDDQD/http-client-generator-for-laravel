@@ -44,4 +44,17 @@ return [
     'stubs' => [
         'custom_path' => env('HTTP_CLIENT_GENERATOR_STUBS_PATH', null),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auto-Registration Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure automatic registration of HTTP client macros.
+    |
+    */
+    'auto_register' => [
+        'enabled' => env('HTTP_CLIENT_GENERATOR_AUTO_REGISTER', true),
+        'cache_ttl' => env('HTTP_CLIENT_GENERATOR_CACHE_TTL', 3600), // 1 hour
+    ],
 ];

@@ -273,7 +273,7 @@ class FetchResponseTest extends TestCase
 
 ### Creates Client Macro Class
 ```bash
-php artisan http-client-generator:request {client?}
+php artisan http-client-generator:macro {client?}
 ```
 
 Output
@@ -299,6 +299,19 @@ class TwitterMacro
         };
     }
 }
+```
+
+**🎉 Automatic Registration**: Macros are automatically registered! No need to manually add them to `AppServiceProvider`.
+
+### Macro Management Commands
+
+```bash
+# List all discovered macros
+php artisan http-client-generator:list-macros
+
+# Clear macros cache (force re-discovery)
+php artisan http-client-generator:clear-cache
+```
 
 // test
 <?php

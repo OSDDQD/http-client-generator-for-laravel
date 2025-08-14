@@ -82,6 +82,10 @@ HTTP_CLIENT_GENERATOR_NAMESPACE=App\\External\\Clients
 HTTP_CLIENT_GENERATOR_PATH=app/External/Clients
 HTTP_CLIENT_GENERATOR_TESTS_PATH=tests/Unit/External/Clients
 HTTP_CLIENT_GENERATOR_STUBS_PATH=/path/to/custom/stubs
+
+# Auto-registration settings
+HTTP_CLIENT_GENERATOR_AUTO_REGISTER=true
+HTTP_CLIENT_GENERATOR_CACHE_TTL=3600
 ```
 
 ## Usage
@@ -247,6 +251,68 @@ php artisan http-client-generator:request CoinGecko GetPrice \
     --path="app/External/CoinGecko"
 ```
 
+## Automatic Macro Registration
+
+🎉 **New Feature**: HTTP client macros are now automatically registered! No more manual configuration in `AppServiceProvider`.
+
+### How it works
+
+1. **Auto-Discovery**: The package automatically scans your configured clients directory
+2. **Smart Caching**: Discovered macros are cached for better performance
+3. **Zero Configuration**: Works out of the box with sensible defaults
+
+### Configuration
+
+You can control auto-registration behavior in your config file:
+
+```php
+// config/http-client-generator.php
+'auto_register' => [
+    'enabled' => true,        // Enable/disable auto-registration
+    'cache_ttl' => 3600,     // Cache TTL in seconds (1 hour)
+],
+```
+
+Or via environment variables:
+
+```env
+HTTP_CLIENT_GENERATOR_AUTO_REGISTER=true
+HTTP_CLIENT_GENERATOR_CACHE_TTL=3600
+```
+
+### Management Commands
+
+```bash
+# List all discovered macros and their status
+php artisan http-client-generator:list-macros
+
+# Clear the macros cache (force re-discovery)
+php artisan http-client-generator:clear-cache
+```
+
+### Manual Registration (if needed)
+
+If you prefer manual control, disable auto-registration and register macros manually:
+
+```php
+// config/http-client-generator.php
+'auto_register' => [
+    'enabled' => false,
+],
+```
+
+Then in your `AppServiceProvider`:
+
+```php
+use Illuminate\Support\Facades\Http;
+use App\Http\Clients\Twitter\TwitterMacro;
+
+public function boot()
+{
+    Http::mixin(new TwitterMacro);
+}
+```
+
 ## Requirements
 
 - PHP ^8.1
@@ -271,9 +337,17 @@ The MIT License (MIT). Please see [License File](LICENSE) for more information.
 
 ## Changelog
 
+### v2.0.0
+- 🎉 **NEW**: Automatic macro registration - no more manual AppServiceProvider configuration!
+- ✅ Added smart macro discovery with caching
+- ✅ Added `http-client-generator:list-macros` command
+- ✅ Added `http-client-generator:clear-cache` command
+- ✅ Added auto-registration configuration options
+- ✅ Enhanced user experience with better command feedback
+
 ### v1.0.0
 - ✅ Added custom namespace support
-- ✅ Added custom path configuration  
+- ✅ Added custom path configuration
 - ✅ Added environment variable support
 - ✅ Added command line options
 - ✅ Added configuration file
