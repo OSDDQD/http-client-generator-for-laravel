@@ -8,10 +8,10 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\CoversClass;
-use App\Http\Clients\{{ client }}\Responses\BadResponse;
-use App\Http\Clients\{{ client }}\Requests\{{ name }}Request;
-use App\Http\Clients\{{ client }}\Responses\{{ name }}Response;
-use App\Http\Clients\{{ client }}\Attributes\SaveInboundWebhookAttribute;
+use {{ response_namespace }}\BadResponse;
+use {{ request_namespace }}\{{ name }}Request;
+use {{ response_namespace }}\{{ name }}Response;
+use {{ attribute_namespace }}\{{ name }}Attribute;
 
 #[CoversClass({{ name }}Request::class)]
 class {{ name }}RequestTest extends TestCase

@@ -2,7 +2,7 @@
 
 namespace {{ namespace }};
 
-use App\Http\Clients\HasStatus;
+use {{ has_status_namespace }}\HasStatus;
 use Illuminate\Http\Client\Response;
 
 class {{ name }}Response

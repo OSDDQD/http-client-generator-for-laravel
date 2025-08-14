@@ -2,9 +2,9 @@
 
 namespace {{ namespace }};
 
-use App\Http\Clients\{{ client }}\Attributes\{{ name }}Attribute;
-use App\Http\Clients\{{ client }}\Responses\BadResponse;
-use App\Http\Clients\{{ client }}\Responses\{{ name }}Response;
+use {{ attribute_namespace }}\{{ name }}Attribute;
+use {{ response_namespace }}\BadResponse;
+use {{ response_namespace }}\{{ name }}Response;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Response;
 
