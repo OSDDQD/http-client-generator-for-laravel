@@ -11,8 +11,8 @@ class AttributeCommandTest extends TestCase
     #[Test]
     public function it_has_correct_signature()
     {
-        $command = new CreateAttributeStubsCommand();
-        
+        $command = new CreateAttributeStubsCommand;
+
         $this->assertStringContainsString('http-client-generator:attribute', $command->getName());
     }
 

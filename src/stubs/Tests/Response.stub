@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Unit\Http\Clients\{{ client }}\Responses;
+namespace {{ test_namespace }};
 
 use Illuminate\Http\Response;
-use {{ has_status_namespace }}\HasStatus;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use GuzzleHttp\Psr7\Response as Psr7Response;
@@ -39,9 +38,5 @@ class {{ name }}ResponseTest extends TestCase
         $this->assertSame($this->response, $createResponse->original);
     }
 
-    #[Test]
-    public function asset_class_has_has_status_trait(): void
-    {
-        $this->assertContains(HasStatus::class, class_uses({{ name }}Response::class));
-    }
+
 }

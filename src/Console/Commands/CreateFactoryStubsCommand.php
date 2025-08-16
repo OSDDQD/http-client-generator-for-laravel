@@ -4,9 +4,9 @@ namespace Osddqd\HttpClientGenerator\Console\Commands;
 
 use function Laravel\Prompts\text;
 
-class CreateAttributeStubsCommand extends AppCommand
+class CreateFactoryStubsCommand extends AppCommand
 {
-    protected $signature = 'http-client-generator:attribute
+    protected $signature = 'http-client-generator:factory
         {client?}
         {name?}
         {--namespace= : Custom base namespace}
@@ -14,7 +14,7 @@ class CreateAttributeStubsCommand extends AppCommand
         {--tests-path= : Custom tests path}
         {--no-tests : Skip test generation}';
 
-    protected $description = 'Command for generating request attributes with custom namespace and path support';
+    protected $description = 'Command for generating HTTP client factory classes with custom namespace and path support';
 
     public function handle()
     {
@@ -26,13 +26,13 @@ class CreateAttributeStubsCommand extends AppCommand
         );
 
         $name = $this->argument('name') ?? text(
-            label: 'What is name of the attribute?',
-            placeholder: 'FetchOne, FetchAll, Create',
-            hint: 'This will be the name e.g. CreateAttribute, FetchOneAttribute',
-            validate: ['requestName' => 'required|max:50'],
+            label: 'What is name of the factory?',
+            placeholder: 'Api, Client, Http',
+            hint: 'This will be the name e.g. ApiFactory, ClientFactory',
+            validate: ['factoryName' => 'required|max:50'],
         );
 
-        $this->createClassStub($client, $name, 'Attribute');
-        $this->createTestStub($client, $name, 'Attribute');
+        $this->createClassStub($client, $name, 'Factory');
+        $this->createTestStub($client, $name, 'Factory');
     }
 }

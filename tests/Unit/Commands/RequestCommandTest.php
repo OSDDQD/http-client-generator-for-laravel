@@ -11,8 +11,8 @@ class RequestCommandTest extends TestCase
     #[Test]
     public function it_has_correct_signature()
     {
-        $command = new CreateRequestStubsCommand();
-        
+        $command = new CreateRequestStubsCommand;
+
         $this->assertStringContainsString('http-client-generator:request', $command->getName());
     }
 

@@ -12,7 +12,13 @@
             "email": "me@jcergolj.me.uk"
         }
     ],
-    "keywords": ["laravel", "http-client", "generator", "artisan", "command"],
+    "keywords": [
+        "laravel",
+        "http-client",
+        "generator",
+        "artisan",
+        "command"
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
@@ -24,7 +30,7 @@
         "laravel/pint": "^1.9",
         "tightenco/tlint": "^9.1",
         "phpunit/phpunit": "^10.0",
-        "orchestra/testbench": "^8.0|^9.0"
+        "orchestra/testbench": "^9.14"
     },
     "autoload": {
         "psr-4": {
@@ -33,7 +39,11 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Osddqd\\HttpClientGenerator\\Tests\\": "tests/"
+            "Osddqd\\HttpClientGenerator\\Tests\\": "tests/",
+            "App\\": "workbench/app/",
+            "Tests\\": "workbench/tests/",
+            "Database\\Factories\\": "workbench/database/factories/",
+            "Database\\Seeders\\": "workbench/database/seeders/"
         }
     },
     "scripts": {
@@ -44,7 +54,34 @@
             "@tlint"
         ],
         "test": [
-            "@php vendor/bin/phpunit"
+            "@clear",
+            "@php vendor/bin/phpunit",
+            "@clear"
+        ],
+        "test-coverage": [
+            "@php vendor/bin/phpunit --coverage-html coverage"
+        ],
+        "test-unit": [
+            "@php vendor/bin/phpunit --testsuite=Unit"
+        ],
+        "test-feature": [
+            "@php vendor/bin/phpunit --testsuite=Feature"
+        ],
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare",
+            "@php -r \"file_exists('workbench') || mkdir('workbench', 0755, true);\""
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "lint": [
+            "@php vendor/bin/pint --ansi"
         ]
     },
     "config": {

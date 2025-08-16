@@ -6,11 +6,12 @@ Enhanced version of the HTTP Client Generator for Laravel with **custom namespac
 
 ## Features
 
-✅ **Custom Namespace Support** - Define your own namespace structure  
-✅ **Custom Path Configuration** - Specify where files should be generated  
-✅ **Environment Variable Support** - Configure via .env file  
-✅ **Command Line Options** - Override settings per command  
-✅ **Backward Compatibility** - Works with existing projects  
+✅ **Custom Namespace Support** - Define your own namespace structure
+✅ **Custom Path Configuration** - Specify where files should be generated
+✅ **Optional Test Generation** - Control test creation with `--no-tests` option
+✅ **Environment Variable Support** - Configure via .env file
+✅ **Command Line Options** - Override settings per command
+✅ **Backward Compatibility** - Works with existing projects
 ✅ **Laravel 10, 11, 12 Support** - Compatible with modern Laravel versions
 
 ## Installation
@@ -41,15 +42,31 @@ composer install
 
 ### Publish Configuration
 
+Для публикации файла конфигурации используйте стандартную команду Laravel:
+
 ```bash
-php artisan http-client-generator:install
+php artisan vendor:publish --provider="Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="config"
 ```
 
-This will publish the configuration file to `config/http-client-generator.php`.
+Это опубликует файл конфигурации в `config/http-client-generator.php`.
+
+Вы также можете опубликовать stub-файлы для кастомизации шаблонов:
+
+```bash
+php artisan vendor:publish --provider="Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="stubs"
+```
 
 ## Configuration
 
+Пакет использует стандартный механизм Laravel для конфигурации. Конфигурация автоматически объединяется с настройками приложения, что позволяет переопределять только необходимые параметры.
+
+### Default Package Configuration
+
+Пакет предоставляет конфигурацию по умолчанию, которая автоматически загружается через `mergeConfigFrom()`. Это означает, что вы можете использовать пакет без публикации конфигурации, а опубликованный файл конфигурации будет содержать только те параметры, которые вы хотите переопределить.
+
 ### Configuration File
+
+После публикации конфигурации (`vendor:publish --tag="config"`) вы получите файл:
 
 ```php
 // config/http-client-generator.php
@@ -59,20 +76,43 @@ return [
     'namespace' => [
         'base' => 'App\\Http\\Clients',        // Base namespace
         'attributes' => 'Attributes',          // Attributes subfolder
-        'requests' => 'Requests',              // Requests subfolder  
+        'requests' => 'Requests',              // Requests subfolder
         'responses' => 'Responses',            // Responses subfolder
+        'factories' => 'Factories',            // Factories subfolder
     ],
-    
+
     'paths' => [
         'base' => 'app/Http/Clients',                    // Base path for classes
         'tests' => 'tests/Unit/Http/Clients',           // Base path for tests
     ],
-    
+
     'stubs' => [
         'custom_path' => null,  // Path to custom stub files (optional)
     ],
+
+    // Test generation settings
+    'generate_tests' => true,  // Generate tests by default (can be overridden with --no-tests)
 ];
 ```
+
+**Важно:** Вы можете удалить из опубликованного файла конфигурации любые параметры, которые вас устраивают по умолчанию. Пакет автоматически объединит вашу конфигурацию с настройками по умолчанию.
+
+### Partial Configuration Example
+
+Например, если вы хотите изменить только базовый namespace, ваш опубликованный файл конфигурации может содержать только:
+
+```php
+// config/http-client-generator.php
+<?php
+
+return [
+    'namespace' => [
+        'base' => 'App\\External\\Clients',
+    ],
+];
+```
+
+Все остальные настройки будут автоматически взяты из конфигурации пакета по умолчанию.
 
 ### Environment Variables
 
@@ -83,9 +123,8 @@ HTTP_CLIENT_GENERATOR_PATH=app/External/Clients
 HTTP_CLIENT_GENERATOR_TESTS_PATH=tests/Unit/External/Clients
 HTTP_CLIENT_GENERATOR_STUBS_PATH=/path/to/custom/stubs
 
-# Auto-registration settings
-HTTP_CLIENT_GENERATOR_AUTO_REGISTER=true
-HTTP_CLIENT_GENERATOR_CACHE_TTL=3600
+# Test generation settings
+HTTP_CLIENT_GENERATOR_GENERATE_TESTS=true
 ```
 
 ## Usage
@@ -104,6 +143,28 @@ php artisan http-client-generator:response Twitter Fetch
 
 # Generate bad response class
 php artisan http-client-generator:bad-response Twitter
+
+# Generate factory class
+php artisan http-client-generator:factory Twitter Api
+
+# Generate all classes at once
+php artisan http-client-generator:all Twitter Fetch
+```
+
+### Test Generation Control
+
+By default, the package generates both classes and their corresponding test files. You can control this behavior:
+
+```bash
+# Skip test generation for a single command
+php artisan http-client-generator:attribute Twitter Fetch --no-tests
+
+# Skip test generation for all classes
+php artisan http-client-generator:all Twitter Fetch --no-tests
+
+# Disable test generation globally in config
+# Set 'generate_tests' => false in config/http-client-generator.php
+# or HTTP_CLIENT_GENERATOR_GENERATE_TESTS=false in .env
 ```
 
 ### With Custom Options
@@ -125,16 +186,20 @@ app/Http/Clients/Twitter/
 │   └── FetchAttribute.php
 ├── Requests/
 │   └── FetchRequest.php
-└── Responses/
-    └── FetchResponse.php
+├── Responses/
+│   └── FetchResponse.php
+└── Factories/
+    └── FetchFactory.php
 
 tests/Unit/Http/Clients/Twitter/
 ├── Attributes/
 │   └── FetchAttributeTest.php
 ├── Requests/
 │   └── FetchRequestTest.php
-└── Responses/
-    └── FetchResponseTest.php
+├── Responses/
+│   └── FetchResponseTest.php
+└── Factories/
+    └── FetchFactoryTest.php
 ```
 
 With custom configuration:
@@ -206,14 +271,12 @@ class FetchRequest
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `http-client-generator:install` | Install configuration file | - |
-| `http-client-generator:attribute` | Generate attribute class | `--namespace`, `--path`, `--tests-path` |
-| `http-client-generator:request` | Generate request class | `--namespace`, `--path`, `--tests-path` |
-| `http-client-generator:response` | Generate response class | `--namespace`, `--path`, `--tests-path` |
-| `http-client-generator:bad-response` | Generate bad response class | `--namespace`, `--path`, `--tests-path` |
-| `http-client-generator:has-status-trait` | Generate HasStatus trait | `--namespace`, `--path` |
-| `http-client-generator:client-macro` | Generate client macro | `--namespace`, `--path` |
-| `http-client-generator:all` | Generate all classes | `--namespace`, `--path`, `--tests-path` |
+| `http-client-generator:attribute` | Generate attribute class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:request` | Generate request class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:response` | Generate response class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:bad-response` | Generate bad response class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:factory` | Generate HTTP client factory class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:all` | Generate all classes | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
 
 ## Migration from Original Package
 
@@ -221,7 +284,7 @@ This package is fully backward compatible. To migrate:
 
 1. Update your `composer.json` to use this package
 2. Run `composer update`
-3. Optionally run `php artisan http-client-generator:install` to get new configuration options
+3. Optionally publish configuration file using `php artisan vendor:publish --provider="Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="config"`
 
 All existing commands work exactly the same way.
 
@@ -240,78 +303,12 @@ You can create your own stub templates:
 Perfect for creating organized HTTP clients for external services:
 
 ```bash
-# Rapira Exchange API
-php artisan http-client-generator:attribute Rapira CreateWallet \
-    --namespace="App\\External\\Rapira" \
-    --path="app/External/Rapira"
-
 # CoinGecko API  
 php artisan http-client-generator:request CoinGecko GetPrice \
     --namespace="App\\External\\CoinGecko" \
     --path="app/External/CoinGecko"
 ```
 
-## Automatic Macro Registration
-
-🎉 **New Feature**: HTTP client macros are now automatically registered! No more manual configuration in `AppServiceProvider`.
-
-### How it works
-
-1. **Auto-Discovery**: The package automatically scans your configured clients directory
-2. **Smart Caching**: Discovered macros are cached for better performance
-3. **Zero Configuration**: Works out of the box with sensible defaults
-
-### Configuration
-
-You can control auto-registration behavior in your config file:
-
-```php
-// config/http-client-generator.php
-'auto_register' => [
-    'enabled' => true,        // Enable/disable auto-registration
-    'cache_ttl' => 3600,     // Cache TTL in seconds (1 hour)
-],
-```
-
-Or via environment variables:
-
-```env
-HTTP_CLIENT_GENERATOR_AUTO_REGISTER=true
-HTTP_CLIENT_GENERATOR_CACHE_TTL=3600
-```
-
-### Management Commands
-
-```bash
-# List all discovered macros and their status
-php artisan http-client-generator:list-macros
-
-# Clear the macros cache (force re-discovery)
-php artisan http-client-generator:clear-cache
-```
-
-### Manual Registration (if needed)
-
-If you prefer manual control, disable auto-registration and register macros manually:
-
-```php
-// config/http-client-generator.php
-'auto_register' => [
-    'enabled' => false,
-],
-```
-
-Then in your `AppServiceProvider`:
-
-```php
-use Illuminate\Support\Facades\Http;
-use App\Http\Clients\Twitter\TwitterMacro;
-
-public function boot()
-{
-    Http::mixin(new TwitterMacro);
-}
-```
 
 ## Requirements
 
@@ -320,36 +317,8 @@ public function boot()
 
 ## Credits
 
-- **OSDDQD** - Enhanced version with custom namespace/path support
 - **Janez Cergolj** - Original package author
 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Changelog
-
-### v2.0.0
-- 🎉 **NEW**: Automatic macro registration - no more manual AppServiceProvider configuration!
-- ✅ Added smart macro discovery with caching
-- ✅ Added `http-client-generator:list-macros` command
-- ✅ Added `http-client-generator:clear-cache` command
-- ✅ Added auto-registration configuration options
-- ✅ Enhanced user experience with better command feedback
-
-### v1.0.0
-- ✅ Added custom namespace support
-- ✅ Added custom path configuration
-- ✅ Added environment variable support
-- ✅ Added command line options
-- ✅ Added configuration file
-- ✅ Added install command
-- ✅ Maintained backward compatibility

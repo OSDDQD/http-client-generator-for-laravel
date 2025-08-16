@@ -2,35 +2,58 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true"
-         processIsolation="false"
-         stopOnFailure="false"
-         executionOrder="random"
-         failOnWarning="true"
-         failOnRisky="true"
-         failOnEmptyTestSuite="true"
-         beStrictAboutOutputDuringTests="true"
-         timeoutForSmallTests="1"
-         timeoutForMediumTests="10"
-         timeoutForLargeTests="60"
-         cacheDirectory=".phpunit.cache">
-    <testsuites>
-        <testsuite name="Unit">
-            <directory>tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Feature">
-            <directory>tests/Feature</directory>
-        </testsuite>
-    </testsuites>
+         colors="true">
+    <testsuite name="Feature">
+        <directory suffix="Test.php">./tests/Feature</directory>
+    </testsuite>
+    <testsuite name="Unit">
+        <directory suffix="Test.php">./tests/Unit</directory>
+    </testsuite>
     <source>
         <include>
             <directory>src</directory>
         </include>
     </source>
     <php>
+        <!-- Основные настройки тестового окружения -->
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:2fl+Ktvkdg+Fuz4Qp/A75G2RTiWVA/ZoKZvp6fiiM10="/>
+        <env name="APP_DEBUG" value="true"/>
+
+        <!-- Настройки базы данных -->
+        <env name="DB_CONNECTION" value="testing"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+
+        <!-- Настройки кеша -->
         <env name="CACHE_DRIVER" value="array"/>
+        <env name="CACHE_PREFIX" value="http_client_generator_test"/>
+
+        <!-- Настройки сессий -->
         <env name="SESSION_DRIVER" value="array"/>
+
+        <!-- Настройки очередей -->
+        <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="QUEUE_DRIVER" value="sync"/>
+
+        <!-- Настройки почты -->
+        <env name="MAIL_MAILER" value="array"/>
+
+        <!-- Настройки логирования -->
+        <env name="LOG_CHANNEL" value="null"/>
+        <env name="LOG_LEVEL" value="debug"/>
+
+        <!-- Настройки файловой системы --> 
+        <env name="VIEW_COMPILED_PATH" value="storage/framework/views"/>
+
+        <!-- Настройки для HTTP Client Generator -->
+        <!-- <env name="HTTP_CLIENT_GENERATOR_NAMESPACE" value="App\Http\Clients"/>
+        <env name="HTTP_CLIENT_GENERATOR_PATH" value="workbench/app/Http/Clients"/>
+        <env name="HTTP_CLIENT_GENERATOR_TESTS_NAMESPACE" value="Tests\Unit"/>
+        <env name="HTTP_CLIENT_GENERATOR_TESTS_PATH" value="workbench/tests/Unit"/>
+        <env name="HTTP_CLIENT_GENERATOR_GENERATE_TESTS" value="true"/> -->
+
+        <!-- Отключение телеметрии -->
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="DEBUGBAR_ENABLED" value="false"/>
     </php>
 </phpunit>

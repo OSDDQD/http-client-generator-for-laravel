@@ -9,9 +9,9 @@ use function Laravel\Prompts\text;
 
 class CreateAllRequestStubsCommand extends Command
 {
-    protected $signature = 'http-client-generator:all {client?} {name?}';
+    protected $signature = 'http-client-generator:all {client?} {name?} {--no-tests : Skip test generation}';
 
-    protected $description = 'Command for generating attributes, request and responses';
+    protected $description = 'Command for generating attributes, request, responses and factory';
 
     public function handle()
     {
@@ -29,27 +29,29 @@ class CreateAllRequestStubsCommand extends Command
             validate: ['requestName' => 'required|max:50'],
         );
 
-        Artisan::call("http-client-generator:attribute {$clientName} {$requestName}");
+        $noTestsOption = $this->option('no-tests') ? ' --no-tests' : '';
+
+        Artisan::call("http-client-generator:attribute {$clientName} {$requestName}{$noTestsOption}");
 
         $output = Artisan::output();
         $this->info($output);
 
-        Artisan::call("http-client-generator:request {$clientName} {$requestName}");
+        Artisan::call("http-client-generator:request {$clientName} {$requestName}{$noTestsOption}");
 
         $output = Artisan::output();
         $this->info($output);
 
-        Artisan::call("http-client-generator:response {$clientName} {$requestName}");
+        Artisan::call("http-client-generator:response {$clientName} {$requestName}{$noTestsOption}");
 
         $output = Artisan::output();
         $this->info($output);
 
-        Artisan::call("http-client-generator:bad-response {$clientName}");
+        Artisan::call("http-client-generator:bad-response {$clientName}{$noTestsOption}");
 
         $output = Artisan::output();
         $this->info($output);
 
-        Artisan::call("http-client-generator:has-status-trait");
+        Artisan::call("http-client-generator:factory {$clientName} {$requestName}{$noTestsOption}");
 
         $output = Artisan::output();
         $this->info($output);

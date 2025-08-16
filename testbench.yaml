@@ -1,0 +1,22 @@
+laravel: ./workbench
+
+env:
+  - VIEW_COMPILED_PATH=(./workbench/storage/framework/views)
+
+purge:
+  directories:
+    - app/*
+    - tests
+    - temp_*
+
+workbench:
+  start: '/'
+  install: false
+  health: false
+  discovers:
+    commands: true
+    config: true
+    views: false
+    factories: false
+    api: false
+    web: false

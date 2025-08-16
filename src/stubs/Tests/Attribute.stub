@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Unit\Http\Clients\{{ client }}\Attributes;
+namespace {{ test_namespace }};
 
-use App\Http\Clients\{{ client }}\Attributes\{{ name }}Attribute;
+use {{ attribute_namespace }}\{{ name }}Attribute;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;

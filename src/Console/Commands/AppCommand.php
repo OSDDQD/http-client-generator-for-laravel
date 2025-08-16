@@ -8,12 +8,29 @@ use Illuminate\Support\Str;
 class AppCommand extends Command
 {
     /**
+     * Get the configuration key for the given type.
+     */
+    protected function getTypeKey(string $type): string
+    {
+        // Преобразуем тип в правильный ключ конфигурации
+        $typeMap = [
+            'Attribute' => 'attributes',
+            'Request' => 'requests',
+            'Response' => 'responses',
+            'Factory' => 'factories',
+        ];
+
+        return $typeMap[$type] ?? strtolower($type).'s';
+    }
+
+    /**
      * Get the namespace for the given client and type.
      */
     protected function getNamespace(string $client, string $type): string
     {
         $baseNamespace = $this->option('namespace') ?? config('http-client-generator.namespace.base', 'App\\Http\\Clients');
-        $typeNamespace = config("http-client-generator.namespace." . strtolower($type) . "s", ucfirst($type) . 's');
+        $typeKey = $this->getTypeKey($type);
+        $typeNamespace = config("http-client-generator.namespace.{$typeKey}", ucfirst($type).'s');
 
         return "{$baseNamespace}\\{$client}\\{$typeNamespace}";
     }
@@ -24,9 +41,42 @@ class AppCommand extends Command
     protected function getClassPath(string $client, string $name, string $type): string
     {
         $basePath = $this->option('path') ?? config('http-client-generator.paths.base', 'app/Http/Clients');
-        $typePath = ucfirst($type) . 's';
+        $typeKey = $this->getTypeKey($type);
+        $typePath = config("http-client-generator.namespace.{$typeKey}", ucfirst($type).'s');
 
         return base_path("{$basePath}/{$client}/{$typePath}/{$name}{$type}.php");
+    }
+
+    /**
+     * Get the namespace for tests.
+     */
+    protected function getTestNamespace(string $client, string $type): string
+    {
+        // Используем конфигурацию namespace для тестов, если она есть
+        $testsNamespace = config('http-client-generator.namespace.tests');
+
+        if ($testsNamespace) {
+            $typePath = ucfirst($type).'s';
+
+            return "{$testsNamespace}\\{$client}\\{$typePath}";
+        }
+
+        // Fallback: генерируем namespace из пути
+        $testsPath = $this->option('tests-path') ?? config('http-client-generator.paths.tests', 'tests/Unit/Http/Clients');
+        $typePath = ucfirst($type).'s';
+
+        // Преобразуем путь в namespace, заменяя слеши на обратные слеши и делая первую букву каждой части заглавной
+        $pathParts = explode('/', trim($testsPath, '/'));
+        $namespaceParts = array_map(function ($part) {
+            // Заменяем подчеркивания и дефисы на пробелы, затем делаем каждое слово с заглавной буквы
+            $part = str_replace(['_', '-'], ' ', $part);
+            $part = ucwords($part);
+
+            return str_replace(' ', '', $part);
+        }, $pathParts);
+        $testsNamespace = implode('\\', $namespaceParts);
+
+        return "{$testsNamespace}\\{$client}\\{$typePath}";
     }
 
     /**
@@ -35,7 +85,8 @@ class AppCommand extends Command
     protected function getTestPath(string $client, string $name, string $type): string
     {
         $testsPath = $this->option('tests-path') ?? config('http-client-generator.paths.tests', 'tests/Unit/Http/Clients');
-        $typePath = ucfirst($type) . 's';
+        $typeKey = $this->getTypeKey($type);
+        $typePath = config("http-client-generator.namespace.{$typeKey}", ucfirst($type).'s');
 
         return base_path("{$testsPath}/{$client}/{$typePath}/{$name}{$type}Test.php");
     }
@@ -51,7 +102,7 @@ class AppCommand extends Command
             return "{$customStubsPath}/{$type}.stub";
         }
 
-        return __DIR__ . '/../../stubs/Clients/' . $type . '.stub';
+        return __DIR__.'/../../stubs/Clients/'.$type.'.stub';
     }
 
     /**
@@ -65,7 +116,7 @@ class AppCommand extends Command
             return "{$customStubsPath}/Tests/{$type}.stub";
         }
 
-        return __DIR__ . '/../../stubs/Tests/' . $type . '.stub';
+        return __DIR__.'/../../stubs/Tests/'.$type.'.stub';
     }
 
     /**
@@ -77,20 +128,21 @@ class AppCommand extends Command
 
         if (file_exists($classPath)) {
             $this->warn("{$name}{$type} class already exists. Skipping.");
+
             return;
         }
 
-        $namespace = $this->getNamespace($client, $type);
         $stubPath = $this->getStubPath($type);
 
         if (! file_exists($stubPath)) {
             $this->error("Stub file not found: {$stubPath}");
+
             return;
         }
 
         $file = file_get_contents($stubPath);
         $newStub = Str::of($file)
-            ->replace($this->getReplacementVariables($client, $name, $type), $this->getReplacementValues($client, $name, $type))
+            ->replace($this->getReplacementVariables(), $this->getReplacementValues($client, $name, $type))
             ->toString();
 
         $directory = dirname($classPath);
@@ -105,7 +157,7 @@ class AppCommand extends Command
     /**
      * Get replacement variables for stub files.
      */
-    protected function getReplacementVariables($client, $name, $type): array
+    protected function getReplacementVariables(): array
     {
         return [
             '{{ namespace }}',
@@ -115,7 +167,7 @@ class AppCommand extends Command
             '{{ attribute_namespace }}',
             '{{ request_namespace }}',
             '{{ response_namespace }}',
-            '{{ has_status_namespace }}',
+            '{{ test_namespace }}',
         ];
     }
 
@@ -134,8 +186,22 @@ class AppCommand extends Command
             $this->getNamespace($client, 'Attribute'),
             $this->getNamespace($client, 'Request'),
             $this->getNamespace($client, 'Response'),
-            $baseNamespace,
+            $this->getTestNamespace($client, $type),
         ];
+    }
+
+    /**
+     * Check if tests should be generated.
+     */
+    protected function shouldGenerateTests(): bool
+    {
+        // Если передана опция --no-tests, не генерируем тесты
+        if ($this->option('no-tests')) {
+            return false;
+        }
+
+        // Иначе используем глобальную настройку из конфигурации
+        return config('http-client-generator.generate_tests', true);
     }
 
     /**
@@ -143,24 +209,32 @@ class AppCommand extends Command
      */
     protected function createTestStub($client, $name, $type)
     {
+        // Проверяем, нужно ли генерировать тесты
+        if (! $this->shouldGenerateTests()) {
+            $this->info("Test generation skipped for {$name}{$type}.");
+
+            return;
+        }
+
         $testPath = $this->getTestPath($client, $name, $type);
 
         if (file_exists($testPath)) {
             $this->warn("{$name}{$type}Test class already exists. Skipping.");
+
             return;
         }
 
-        $namespace = $this->getNamespace($client, $type);
         $stubPath = $this->getTestStubPath($type);
 
         if (! file_exists($stubPath)) {
             $this->error("Test stub file not found: {$stubPath}");
+
             return;
         }
 
         $stub = file_get_contents($stubPath);
         $newStub = Str::of($stub)
-            ->replace($this->getReplacementVariables($client, $name, $type), $this->getReplacementValues($client, $name, $type))
+            ->replace($this->getReplacementVariables(), $this->getReplacementValues($client, $name, $type))
             ->toString();
 
         $directory = dirname($testPath);

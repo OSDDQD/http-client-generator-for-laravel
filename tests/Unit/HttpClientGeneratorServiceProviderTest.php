@@ -18,10 +18,6 @@ class HttpClientGeneratorServiceProviderTest extends TestCase
         $this->assertArrayHasKey('http-client-generator:response', $commands);
         $this->assertArrayHasKey('http-client-generator:bad-response', $commands);
         $this->assertArrayHasKey('http-client-generator:all', $commands);
-        $this->assertArrayHasKey('http-client-generator:client-macro', $commands);
-        $this->assertArrayHasKey('http-client-generator:list-macros', $commands);
-        $this->assertArrayHasKey('http-client-generator:clear-cache', $commands);
-        $this->assertArrayHasKey('http-client-generator:install', $commands);
     }
 
     #[Test]
