@@ -9,13 +9,13 @@ use function Laravel\Prompts\text;
 
 class CreateClientMacroStubsCommand extends Command
 {
-    protected $signature = 'http-client-generator:macro';
+    protected $signature = 'http-client-generator:client-macro {client?}';
 
     protected $description = 'Command for generating client macro file';
 
     public function handle()
     {
-        $clientName = text(
+        $clientName = $this->argument('client') ?? text(
             label: 'What is the client\'s name?',
             placeholder: 'Trello, Twitter, Linkedin',
             hint: 'This will be the folder name e.g Http\Clients\Twitter\\',
@@ -39,7 +39,8 @@ class CreateClientMacroStubsCommand extends Command
 
         $file = file_get_contents(__DIR__ . '../../../stubs/Clients/Macro.stub');
 
-        $newStub = Str::of($file)->replace(['{{ client }}', '{{ method }}'], [$client, strtolower($client)])->toString();
+        $namespace = "App\\Http\\Clients\\{$client}";
+        $newStub = Str::of($file)->replace(['{{ namespace }}', '{{ client }}', '{{ method }}'], [$namespace, $client, strtolower($client)])->toString();
 
         if (! is_dir(app_path("/Http/Clients/{$client}"))) {
             mkdir(app_path("/Http/Clients/{$client}/"), 0755, true);

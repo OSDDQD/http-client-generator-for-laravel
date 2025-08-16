@@ -2,22 +2,54 @@
 
 namespace Osddqd\HttpClientGenerator;
 
-use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
-use Osddqd\HttpClientGenerator\Console\Commands\ClearMacrosCacheCommand;
-use Osddqd\HttpClientGenerator\Console\Commands\CreateAllRequestStubsCommand;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Osddqd\HttpClientGenerator\Console\Commands\CreateAttributeStubsCommand;
-use Osddqd\HttpClientGenerator\Console\Commands\CreateBadResponseStubsCommand;
-use Osddqd\HttpClientGenerator\Console\Commands\CreateClientMacroStubsCommand;
-use Osddqd\HttpClientGenerator\Console\Commands\CreateHasStatusTraitStubsCommand;
 use Osddqd\HttpClientGenerator\Console\Commands\CreateRequestStubsCommand;
 use Osddqd\HttpClientGenerator\Console\Commands\CreateResponseStubsCommand;
-use Osddqd\HttpClientGenerator\Console\Commands\InstallCommand;
+use Osddqd\HttpClientGenerator\Console\Commands\CreateBadResponseStubsCommand;
+use Osddqd\HttpClientGenerator\Console\Commands\CreateAllRequestStubsCommand;
+use Osddqd\HttpClientGenerator\Console\Commands\CreateClientMacroStubsCommand;
+use Osddqd\HttpClientGenerator\Console\Commands\CreateHasStatusTraitStubsCommand;
 use Osddqd\HttpClientGenerator\Console\Commands\ListMacrosCommand;
+use Osddqd\HttpClientGenerator\Console\Commands\ClearMacrosCacheCommand;
+use Osddqd\HttpClientGenerator\Console\Commands\InstallCommand;
 
-class HttpClientGeneratorServiceProvider extends ServiceProvider implements DeferrableProvider
+class HttpClientGeneratorServiceProvider extends ServiceProvider
 {
-    public function register(): void
+    public function boot()
+    {
+        $this->publishes([
+            __DIR__ . '/config/http-client-generator.php' => config_path('http-client-generator.php'),
+        ], 'http-client-generator-config');
+
+        $this->publishes([
+            __DIR__ . '/stubs' => resource_path('stubs/http-client-generator'),
+        ], 'http-client-generator-stubs');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                CreateAttributeStubsCommand::class,
+                CreateRequestStubsCommand::class,
+                CreateResponseStubsCommand::class,
+                CreateBadResponseStubsCommand::class,
+                CreateAllRequestStubsCommand::class,
+                CreateClientMacroStubsCommand::class,
+                CreateHasStatusTraitStubsCommand::class,
+                ListMacrosCommand::class,
+                ClearMacrosCacheCommand::class,
+                InstallCommand::class,
+            ]);
+        }
+
+        // Автоматическая регистрация макросов (только не в тестовой среде)
+        if (! app()->environment('testing')) {
+            $this->registerHttpClientMacros();
+        }
+    }
+
+    public function register()
     {
         $this->mergeConfigFrom(
             __DIR__ . '/config/http-client-generator.php',
@@ -25,81 +57,64 @@ class HttpClientGeneratorServiceProvider extends ServiceProvider implements Defe
         );
     }
 
-    public function boot(): void
-    {
-        // Автоматическая регистрация макросов
-        $this->registerHttpMacros();
-
-        if (! $this->app->runningInConsole()) {
-            return;
-        }
-
-        $this->commands([
-            ClearMacrosCacheCommand::class,
-            CreateAllRequestStubsCommand::class,
-            CreateAttributeStubsCommand::class,
-            CreateRequestStubsCommand::class,
-            CreateResponseStubsCommand::class,
-            CreateHasStatusTraitStubsCommand::class,
-            CreateBadResponseStubsCommand::class,
-            CreateClientMacroStubsCommand::class,
-            InstallCommand::class,
-            ListMacrosCommand::class,
-        ]);
-
-        $this->publishes([
-            __DIR__ . '/config/http-client-generator.php' => config_path('http-client-generator.php'),
-        ], 'config');
-
-        $this->publishes([
-            __DIR__ . '/config/http-client-generator.php' => config_path('http-client-generator.php'),
-        ], 'http-client-generator-config');
-    }
-
     /**
-     * Автоматически регистрирует все найденные HTTP макросы
+     * Автоматическая регистрация HTTP клиентских макросов
      */
-    protected function registerHttpMacros(): void
+    public function registerHttpClientMacros(): void
     {
-        // Проверяем, включена ли автоматическая регистрация
         if (! config('http-client-generator.auto_register.enabled', true)) {
             return;
         }
 
-        $baseNamespace = config('http-client-generator.namespace.base', 'App\\Http\\Clients');
-        $basePath = config('http-client-generator.paths.base', 'app/Http/Clients');
-
-        // Получаем абсолютный путь к директории с клиентами
-        $clientsPath = base_path($basePath);
-
-        if (! is_dir($clientsPath)) {
-            return;
-        }
-
-        // Используем кэш для улучшения производительности
         $cacheKey = 'http_client_generator.macros';
         $cacheTtl = config('http-client-generator.auto_register.cache_ttl', 3600);
 
-        $macroClasses = cache()->remember($cacheKey, $cacheTtl, function () use ($clientsPath, $baseNamespace) {
-            return $this->discoverMacroClasses($clientsPath, $baseNamespace);
+        $macros = Cache::remember($cacheKey, $cacheTtl, function () {
+            return $this->discoverMacros();
         });
 
-        // Регистрируем найденные макросы
-        foreach ($macroClasses as $macroClass) {
+        // Отладочная информация для тестов
+        if (app()->environment('testing')) {
+            \Log::info('Discovered macros: ' . json_encode($macros));
+        }
+
+        foreach ($macros as $macroClass) {
             if (class_exists($macroClass)) {
-                \Illuminate\Support\Facades\Http::mixin(new $macroClass);
+                $macroInstance = new $macroClass();
+                $methodName = $this->getMacroMethodName($macroClass);
+
+                if (method_exists($macroInstance, $methodName)) {
+                    Http::mixin($macroInstance);
+                } else {
+                    // Отладочная информация для тестов
+                    if (app()->environment('testing')) {
+                        throw new \Exception("Method {$methodName} not found in {$macroClass}");
+                    }
+                }
+            } else {
+                // Отладочная информация для тестов
+                if (app()->environment('testing')) {
+                    throw new \Exception("Class {$macroClass} not found");
+                }
             }
         }
     }
 
     /**
-     * Обнаруживает все классы макросов в указанной директории
+     * Поиск макросов в директории клиентов
      */
-    protected function discoverMacroClasses(string $clientsPath, string $baseNamespace): array
+    protected function discoverMacros(): array
     {
-        $macroClasses = [];
+        $baseNamespace = config('http-client-generator.namespace.base', 'App\\Http\\Clients');
+        $basePath = config('http-client-generator.paths.base', 'app/Http/Clients');
 
-        // Сканируем директории клиентов
+        $clientsPath = base_path($basePath);
+        $macros = [];
+
+        if (! is_dir($clientsPath)) {
+            return $macros;
+        }
+
         $clientDirectories = glob($clientsPath . '/*', GLOB_ONLYDIR);
 
         foreach ($clientDirectories as $clientDir) {
@@ -107,26 +122,25 @@ class HttpClientGeneratorServiceProvider extends ServiceProvider implements Defe
             $macroFile = $clientDir . '/' . $clientName . 'Macro.php';
 
             if (file_exists($macroFile)) {
-                $macroClasses[] = $baseNamespace . '\\' . $clientName . '\\' . $clientName . 'Macro';
+                $macroClass = $baseNamespace . '\\' . $clientName . '\\' . $clientName . 'Macro';
+                $macros[] = $macroClass;
             }
         }
 
-        return $macroClasses;
+        return $macros;
     }
 
-    public function provides(): array
+    /**
+     * Получить имя метода макроса из класса
+     */
+    protected function getMacroMethodName(string $macroClass): string
     {
-        return [
-            ClearMacrosCacheCommand::class,
-            CreateAllRequestStubsCommand::class,
-            CreateAttributeStubsCommand::class,
-            CreateRequestStubsCommand::class,
-            CreateResponseStubsCommand::class,
-            CreateHasStatusTraitStubsCommand::class,
-            CreateBadResponseStubsCommand::class,
-            CreateClientMacroStubsCommand::class,
-            InstallCommand::class,
-            ListMacrosCommand::class,
-        ];
+        // Извлекаем имя клиента из класса макроса
+        // Например: App\Http\Clients\Twitter\TwitterMacro -> twitter
+        $parts = explode('\\', $macroClass);
+        $className = end($parts);
+        $clientName = str_replace('Macro', '', $className);
+
+        return strtolower($clientName);
     }
 }

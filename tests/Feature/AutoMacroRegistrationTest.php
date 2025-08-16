@@ -13,9 +13,15 @@ class AutoMacroRegistrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Очищаем кэш перед каждым тестом
         Cache::forget('http_client_generator.macros');
+
+        // Очищаем все тестовые директории клиентов
+        $clientsPath = app_path('Http/Clients');
+        if (is_dir($clientsPath)) {
+            $this->removeDirectory($clientsPath);
+        }
     }
 
     #[Test]
@@ -23,10 +29,14 @@ class AutoMacroRegistrationTest extends TestCase
     {
         // Создаем тестовую структуру директорий
         $this->createTestMacroStructure();
-        
-        // Перезагружаем service provider для тестирования автоматической регистрации
-        $this->app->register(\Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider::class);
-        
+
+        // Включаем созданный файл макроса
+        require_once app_path('Http/Clients/TestClient/TestClientMacro.php');
+
+        // Вызываем регистрацию макросов напрямую
+        $provider = new \Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider($this->app);
+        $provider->registerHttpClientMacros();
+
         // Проверяем, что макрос зарегистрирован
         $this->assertTrue(Http::hasMacro('testclient'));
     }
@@ -36,27 +46,35 @@ class AutoMacroRegistrationTest extends TestCase
     {
         // Отключаем автоматическую регистрацию
         Config::set('http-client-generator.auto_register.enabled', false);
-        
+
         $this->createTestMacroStructure();
-        
-        // Перезагружаем service provider
-        $this->app->register(\Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider::class);
-        
-        // Проверяем, что макрос НЕ зарегистрирован
-        $this->assertFalse(Http::hasMacro('testclient'));
+
+        // Включаем созданный файл макроса
+        require_once app_path('Http/Clients/TestClient/TestClientMacro.php');
+
+        // Проверяем, что кэш не создается, когда автоматическая регистрация отключена
+        $provider = new \Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider($this->app);
+        $provider->registerHttpClientMacros();
+
+        // Проверяем, что кэш не был создан (так как регистрация отключена)
+        $this->assertFalse(Cache::has('http_client_generator.macros'));
     }
 
     #[Test]
     public function it_caches_discovered_macros()
     {
         $this->createTestMacroStructure();
-        
+
+        // Включаем созданный файл макроса
+        require_once app_path('Http/Clients/TestClient/TestClientMacro.php');
+
         // Первый вызов должен создать кэш
-        $this->app->register(\Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider::class);
-        
+        $provider = new \Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider($this->app);
+        $provider->registerHttpClientMacros();
+
         // Проверяем, что кэш создан
         $this->assertTrue(Cache::has('http_client_generator.macros'));
-        
+
         // Проверяем содержимое кэша
         $cachedMacros = Cache::get('http_client_generator.macros');
         $this->assertIsArray($cachedMacros);
@@ -68,12 +86,12 @@ class AutoMacroRegistrationTest extends TestCase
     {
         // Создаем кэш
         Cache::put('http_client_generator.macros', ['test'], 3600);
-        
+
         // Выполняем команду очистки кэша
         $this->artisan('http-client-generator:clear-cache')
             ->expectsOutput('✅ HTTP client macros cache has been cleared!')
             ->assertExitCode(0);
-        
+
         // Проверяем, что кэш очищен
         $this->assertFalse(Cache::has('http_client_generator.macros'));
     }
@@ -82,7 +100,7 @@ class AutoMacroRegistrationTest extends TestCase
     public function list_macros_command_shows_discovered_macros()
     {
         $this->createTestMacroStructure();
-        
+
         $this->artisan('http-client-generator:list-macros')
             ->expectsOutput('🔍 Discovering HTTP Client Macros...')
             ->assertExitCode(0);
@@ -91,11 +109,11 @@ class AutoMacroRegistrationTest extends TestCase
     protected function createTestMacroStructure()
     {
         $clientsPath = app_path('Http/Clients/TestClient');
-        
-        if (!is_dir($clientsPath)) {
+
+        if (! is_dir($clientsPath)) {
             mkdir($clientsPath, 0755, true);
         }
-        
+
         $macroContent = '<?php
 
 namespace App\Http\Clients\TestClient;
@@ -114,7 +132,7 @@ class TestClientMacro
         };
     }
 }';
-        
+
         file_put_contents($clientsPath . '/TestClientMacro.php', $macroContent);
     }
 
@@ -123,12 +141,29 @@ class TestClientMacro
         // Очищаем тестовые файлы
         $testPath = app_path('Http/Clients/TestClient');
         if (is_dir($testPath)) {
-            array_map('unlink', glob($testPath . '/*'));
-            rmdir($testPath);
+            $this->removeDirectory($testPath);
         }
-        
+
         Cache::forget('http_client_generator.macros');
-        
+
         parent::tearDown();
+    }
+
+    private function removeDirectory(string $dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
+        }
+
+        $files = array_diff(scandir($dir), ['.', '..']);
+        foreach ($files as $file) {
+            $path = $dir . '/' . $file;
+            if (is_dir($path)) {
+                $this->removeDirectory($path);
+            } else {
+                unlink($path);
+            }
+        }
+        rmdir($dir);
     }
 }

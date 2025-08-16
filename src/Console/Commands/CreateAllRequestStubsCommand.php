@@ -9,24 +9,24 @@ use function Laravel\Prompts\text;
 
 class CreateAllRequestStubsCommand extends Command
 {
-    protected $signature = 'http-client-generator:all';
+    protected $signature = 'http-client-generator:all {client?} {name?}';
 
     protected $description = 'Command for generating attributes, request and responses';
 
     public function handle()
     {
-        $clientName = text(
+        $clientName = $this->argument('client') ?? text(
             label: 'What is the client\'s name?',
             placeholder: 'Trello, Twitter, Linkedin',
             hint: 'This will be the folder name e.g Http\Clients\Twitter\\',
-            validate: ['clientName' => 'required|max:50']
+            validate: ['clientName' => 'required|max:50'],
         );
 
-        $requestName = text(
+        $requestName = $this->argument('name') ?? text(
             label: 'What is name of the request?',
             placeholder: 'FetchOne, FetchAll, Create',
             hint: 'This will be the name e.g. FetchOneReqauest, FetchOneAttributes, FetchOneResponse',
-            validate: ['requestName' => 'required|max:50']
+            validate: ['requestName' => 'required|max:50'],
         );
 
         Artisan::call("http-client-generator:attribute {$clientName} {$requestName}");
@@ -45,6 +45,11 @@ class CreateAllRequestStubsCommand extends Command
         $this->info($output);
 
         Artisan::call("http-client-generator:bad-response {$clientName}");
+
+        $output = Artisan::output();
+        $this->info($output);
+
+        Artisan::call("http-client-generator:has-status-trait");
 
         $output = Artisan::output();
         $this->info($output);

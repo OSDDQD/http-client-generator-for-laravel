@@ -13,6 +13,7 @@ return [
     */
     'namespace' => [
         'base' => env('HTTP_CLIENT_GENERATOR_NAMESPACE', 'App\\Http\\Clients'),
+        'tests' => env('HTTP_CLIENT_GENERATOR_TESTS_NAMESPACE', 'Tests\\Unit'),
         'attributes' => 'Attributes',
         'requests' => 'Requests',
         'responses' => 'Responses',
@@ -29,7 +30,7 @@ return [
     */
     'paths' => [
         'base' => env('HTTP_CLIENT_GENERATOR_PATH', 'app/Http/Clients'),
-        'tests' => env('HTTP_CLIENT_GENERATOR_TESTS_PATH', 'tests/Unit/Http/Clients'),
+        'tests' => env('HTTP_CLIENT_GENERATOR_TESTS_PATH', 'tests/Unit'),
     ],
 
     /*
@@ -42,6 +43,7 @@ return [
     |
     */
     'stubs' => [
+        'path' => env('HTTP_CLIENT_GENERATOR_STUBS_PATH', null),
         'custom_path' => env('HTTP_CLIENT_GENERATOR_STUBS_PATH', null),
     ],
 

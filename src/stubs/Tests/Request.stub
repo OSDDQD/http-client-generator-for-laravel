@@ -36,7 +36,7 @@ class {{ name }}RequestTest extends TestCase
         Http::fake([
             "" => Http::response(
                 [],
-                Response::
+                Response::HTTP_OK
             ),
         ]);
 
