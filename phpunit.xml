@@ -3,12 +3,14 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true">
-    <testsuite name="Feature">
-        <directory suffix="Test.php">./tests/Feature</directory>
-    </testsuite>
-    <testsuite name="Unit">
-        <directory suffix="Test.php">./tests/Unit</directory>
-    </testsuite>
+    <testsuites>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+    </testsuites>
     <source>
         <include>
             <directory>src</directory>
@@ -41,16 +43,6 @@
         <!-- Настройки логирования -->
         <env name="LOG_CHANNEL" value="null"/>
         <env name="LOG_LEVEL" value="debug"/>
-
-        <!-- Настройки файловой системы --> 
-        <env name="VIEW_COMPILED_PATH" value="storage/framework/views"/>
-
-        <!-- Настройки для HTTP Client Generator -->
-        <!-- <env name="HTTP_CLIENT_GENERATOR_NAMESPACE" value="App\Http\Clients"/>
-        <env name="HTTP_CLIENT_GENERATOR_PATH" value="workbench/app/Http/Clients"/>
-        <env name="HTTP_CLIENT_GENERATOR_TESTS_NAMESPACE" value="Tests\Unit"/>
-        <env name="HTTP_CLIENT_GENERATOR_TESTS_PATH" value="workbench/tests/Unit"/>
-        <env name="HTTP_CLIENT_GENERATOR_GENERATE_TESTS" value="true"/> -->
 
         <!-- Отключение телеметрии -->
         <env name="TELESCOPE_ENABLED" value="false"/>

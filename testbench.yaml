@@ -1,7 +1,7 @@
-laravel: ./workbench
+laravel: ./tests/workbench
 
 env:
-  - VIEW_COMPILED_PATH=(./workbench/storage/framework/views)
+  - VIEW_COMPILED_PATH=(./tests/workbench/storage/framework/views)
 
 purge:
   directories:

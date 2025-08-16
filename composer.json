@@ -40,10 +40,10 @@
     "autoload-dev": {
         "psr-4": {
             "Osddqd\\HttpClientGenerator\\Tests\\": "tests/",
-            "App\\": "workbench/app/",
-            "Tests\\": "workbench/tests/",
-            "Database\\Factories\\": "workbench/database/factories/",
-            "Database\\Seeders\\": "workbench/database/seeders/"
+            "App\\": "tests/workbench/app/",
+            "Tests\\": "tests/workbench/tests/",
+            "Database\\Factories\\": "tests/workbench/database/factories/",
+            "Database\\Seeders\\": "tests/workbench/database/seeders/"
         }
     },
     "scripts": {
@@ -70,7 +70,7 @@
         "post-autoload-dump": [
             "@clear",
             "@prepare",
-            "@php -r \"file_exists('workbench') || mkdir('workbench', 0755, true);\""
+            "@php -r \"file_exists('tests/workbench') || mkdir('tests/workbench', 0755, true);\""
         ],
         "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
