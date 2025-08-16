@@ -1,10 +1,17 @@
 <?php
 
-namespace Osddqd\HttpClientGenerator\Tests\Feature;
+namespace osddqd\HttpClientGenerator\Tests\Feature;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
-use Osddqd\HttpClientGenerator\Tests\TestCase;
+use osddqd\HttpClientGenerator\Console\Commands\AppCommand;
+use osddqd\HttpClientGenerator\Console\Commands\CreateAllRequestStubsCommand;
+use osddqd\HttpClientGenerator\Console\Commands\CreateAttributeStubsCommand;
+use osddqd\HttpClientGenerator\Console\Commands\CreateBadResponseStubsCommand;
+use osddqd\HttpClientGenerator\Console\Commands\CreateFactoryStubsCommand;
+use osddqd\HttpClientGenerator\Console\Commands\CreateRequestStubsCommand;
+use osddqd\HttpClientGenerator\Console\Commands\CreateResponseStubsCommand;
+use osddqd\HttpClientGenerator\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
 class CommandGenerationTest extends TestCase
@@ -12,10 +19,6 @@ class CommandGenerationTest extends TestCase
     private string $testBasePath;
 
     private string $testTestsPath;
-
-    private array $createdFiles = [];
-
-    private array $createdDirectories = [];
 
     protected function setUp(): void
     {
@@ -309,12 +312,6 @@ class CommandGenerationTest extends TestCase
 
         $classContent = File::get($classPath);
         $this->assertStringContainsString('namespace App\External\Clients\CustomAPI\Attributes;', $classContent);
-
-        // Добавляем в список для очистки
-        $this->createdFiles[] = $classPath;
-        $this->createdFiles[] = $testPath;
-        $this->createdDirectories[] = base_path($customPath);
-        $this->createdDirectories[] = base_path($customTestsPath);
     }
 
     #[Test]
@@ -328,8 +325,6 @@ class CommandGenerationTest extends TestCase
 
         $classPath = $this->testBasePath.'/ExistingClient/Attributes/ExistingActionAttribute.php';
         $this->assertFileExists($classPath);
-
-        $originalContent = File::get($classPath);
 
         // Пытаемся создать тот же файл снова
         $this->artisan('http-client-generator:attribute', [
@@ -373,7 +368,7 @@ class CommandGenerationTest extends TestCase
         ])->assertExitCode(0);
 
         $classPath = $this->testBasePath.'/SyntaxTest/Requests/ValidateCodeRequest.php';
-        $testPath = $this->testTestsPath.'/SyntaxTest/Requests/ValidateCodeRequestTest.php';
+        $testPath = "{$this->testTestsPath}/SyntaxTest/Requests/ValidateCodeRequestTest.php";
 
         // Проверяем синтаксис PHP
         $classContent = File::get($classPath);
@@ -436,6 +431,95 @@ class CommandGenerationTest extends TestCase
 
             $classPath = $this->testBasePath."/{$case['client']}/Attributes/{$case['name']}Attribute.php";
             $this->assertFileExists($classPath, "Failed for client: {$case['client']}, name: {$case['name']}");
+        }
+    }
+
+    #[Test]
+    public function it_can_instantiate_command_classes()
+    {
+        // Проверяем, что все классы команд могут быть успешно инстанциированы
+        $commandClasses = [
+            CreateAttributeStubsCommand::class,
+            CreateRequestStubsCommand::class,
+            CreateResponseStubsCommand::class,
+            CreateBadResponseStubsCommand::class,
+            CreateFactoryStubsCommand::class,
+            CreateAllRequestStubsCommand::class,
+        ];
+
+        foreach ($commandClasses as $commandClass) {
+            $this->assertTrue(
+                class_exists($commandClass),
+                "Класс {$commandClass} не существует или не может быть загружен",
+            );
+
+            $command = new $commandClass;
+            $this->assertInstanceOf(
+                $commandClass,
+                $command,
+                "Не удалось создать экземпляр класса {$commandClass}",
+            );
+
+            // Проверяем, что команда наследуется от правильного базового класса
+            if ($commandClass !== CreateAllRequestStubsCommand::class) {
+                $this->assertInstanceOf(
+                    AppCommand::class,
+                    $command,
+                    "Команда {$commandClass} должна наследоваться от AppCommand",
+                );
+            }
+        }
+    }
+
+    #[Test]
+    public function it_can_instantiate_base_command_class()
+    {
+        // Проверяем, что базовый класс AppCommand существует и доступен
+        $this->assertTrue(
+            class_exists(AppCommand::class),
+            'Базовый класс AppCommand не существует или не может быть загружен',
+        );
+
+        // Создаем анонимный класс, наследующийся от AppCommand для тестирования
+        $command = new class extends AppCommand
+        {
+            protected $signature = 'test:command';
+
+            protected $description = 'Test command';
+
+            public function handle()
+            {
+                return 0;
+            }
+        };
+
+        $this->assertInstanceOf(
+            AppCommand::class,
+            $command,
+            'Не удалось создать экземпляр, наследующийся от AppCommand',
+        );
+    }
+
+    #[Test]
+    public function it_verifies_command_signatures_are_correct()
+    {
+        // Проверяем, что команды имеют правильные сигнатуры
+        $expectedSignatures = [
+            CreateAttributeStubsCommand::class => 'http-client-generator:attribute',
+            CreateRequestStubsCommand::class => 'http-client-generator:request',
+            CreateResponseStubsCommand::class => 'http-client-generator:response',
+            CreateBadResponseStubsCommand::class => 'http-client-generator:bad-response',
+            CreateFactoryStubsCommand::class => 'http-client-generator:factory',
+            CreateAllRequestStubsCommand::class => 'http-client-generator:all',
+        ];
+
+        foreach ($expectedSignatures as $commandClass => $expectedSignature) {
+            $command = new $commandClass;
+            $this->assertStringContainsString(
+                $expectedSignature,
+                $command->getName(),
+                "Команда {$commandClass} имеет неправильную сигнатуру",
+            );
         }
     }
 

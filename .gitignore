@@ -3,26 +3,3 @@ vendor/
 
 # PHPUnit cache
 .phpunit.result.cache
-
-# Workbench - ignore generated content but keep structure
-workbench/bootstrap/cache/*
-workbench/storage/*
-workbench/vendor/
-
-# Ignore generated HTTP client classes and tests
-workbench/app/Http/Clients/*
-workbench/tests/*
-
-# Keep workbench structure but ignore generated content
-!workbench/app/
-!workbench/app/Http/
-!workbench/app/Http/Clients/
-!workbench/app/Http/Clients/.gitkeep
-!workbench/tests/
-!workbench/tests/.gitkeep
-
-# Keep existing workbench files
-!workbench/bootstrap/
-!workbench/database/
-!workbench/resources/
-!workbench/routes/

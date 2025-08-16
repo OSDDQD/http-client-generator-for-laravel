@@ -4,10 +4,6 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "OSDDQD",
-            "email": "osddqd@users.noreply.github.com"
-        },
-        {
             "name": "Janez Cergolj",
             "email": "me@jcergolj.me.uk"
         }
@@ -34,12 +30,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Osddqd\\HttpClientGenerator\\": "src/"
+            "osddqd\\HttpClientGenerator\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Osddqd\\HttpClientGenerator\\Tests\\": "tests/",
+            "osddqd\\HttpClientGenerator\\Tests\\": "tests/",
             "App\\": "tests/workbench/app/",
             "Tests\\": "tests/workbench/tests/",
             "Database\\Factories\\": "tests/workbench/database/factories/",
@@ -54,9 +50,7 @@
             "@tlint"
         ],
         "test": [
-            "@clear",
-            "@php vendor/bin/phpunit",
-            "@clear"
+            "@php vendor/bin/phpunit"
         ],
         "test-coverage": [
             "@php vendor/bin/phpunit --coverage-html coverage"
@@ -92,7 +86,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Osddqd\\HttpClientGenerator\\HttpClientGeneratorServiceProvider"
+                "osddqd\\HttpClientGenerator\\HttpClientGeneratorServiceProvider"
             ]
         }
     }

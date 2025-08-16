@@ -1,9 +1,9 @@
 <?php
 
-namespace Osddqd\HttpClientGenerator\Tests\Unit;
+namespace osddqd\HttpClientGenerator\Tests\Unit;
 
 use Illuminate\Support\Facades\Config;
-use Osddqd\HttpClientGenerator\Tests\TestCase;
+use osddqd\HttpClientGenerator\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
 class ConfigTest extends TestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace Osddqd\HttpClientGenerator\Console\Commands;
+namespace osddqd\HttpClientGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -9,7 +9,7 @@ use function Laravel\Prompts\text;
 
 class CreateAllRequestStubsCommand extends Command
 {
-    protected $signature = 'http-client-generator:all {client?} {name?} {--no-tests : Skip test generation}';
+    protected $signature = 'http-client-generator:all {client?} {name?} {--test-namespace= : Custom namespace for tests} {--no-tests : Skip test generation}';
 
     protected $description = 'Command for generating attributes, request, responses and factory';
 
@@ -29,29 +29,50 @@ class CreateAllRequestStubsCommand extends Command
             validate: ['requestName' => 'required|max:50'],
         );
 
-        $noTestsOption = $this->option('no-tests') ? ' --no-tests' : '';
+        // Собираем опции для передачи в команды
+        $options = [];
+        if ($this->option('no-tests')) {
+            $options['--no-tests'] = true;
+        }
+        if ($this->option('test-namespace')) {
+            $options['--test-namespace'] = $this->option('test-namespace');
+        }
 
-        Artisan::call("http-client-generator:attribute {$clientName} {$requestName}{$noTestsOption}");
-
-        $output = Artisan::output();
-        $this->info($output);
-
-        Artisan::call("http-client-generator:request {$clientName} {$requestName}{$noTestsOption}");
-
-        $output = Artisan::output();
-        $this->info($output);
-
-        Artisan::call("http-client-generator:response {$clientName} {$requestName}{$noTestsOption}");
-
-        $output = Artisan::output();
-        $this->info($output);
-
-        Artisan::call("http-client-generator:bad-response {$clientName}{$noTestsOption}");
+        Artisan::call('http-client-generator:attribute', array_merge([
+            'client' => $clientName,
+            'name' => $requestName,
+        ], $options));
 
         $output = Artisan::output();
         $this->info($output);
 
-        Artisan::call("http-client-generator:factory {$clientName} {$requestName}{$noTestsOption}");
+        Artisan::call('http-client-generator:request', array_merge([
+            'client' => $clientName,
+            'name' => $requestName,
+        ], $options));
+
+        $output = Artisan::output();
+        $this->info($output);
+
+        Artisan::call('http-client-generator:response', array_merge([
+            'client' => $clientName,
+            'name' => $requestName,
+        ], $options));
+
+        $output = Artisan::output();
+        $this->info($output);
+
+        Artisan::call('http-client-generator:bad-response', array_merge([
+            'client' => $clientName,
+        ], $options));
+
+        $output = Artisan::output();
+        $this->info($output);
+
+        Artisan::call('http-client-generator:factory', array_merge([
+            'client' => $clientName,
+            'name' => $requestName,
+        ], $options));
 
         $output = Artisan::output();
         $this->info($output);

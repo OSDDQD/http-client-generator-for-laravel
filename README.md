@@ -1,324 +1,221 @@
-# Enhanced HTTP Client Generator for Laravel
+# HTTP Client Generator для Laravel
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Enhanced version of the HTTP Client Generator for Laravel with **custom namespace and path support**. This package generates classes for Laravel HTTP client with full customization capabilities.
+Мощный генератор HTTP клиентов для Laravel с поддержкой кастомных namespace и путей. Этот пакет автоматизирует создание структурированных классов для работы с внешними API, включая автоматическую генерацию тестов.
 
-## Features
+## 🚀 Описание проекта
 
-✅ **Custom Namespace Support** - Define your own namespace structure
-✅ **Custom Path Configuration** - Specify where files should be generated
-✅ **Optional Test Generation** - Control test creation with `--no-tests` option
-✅ **Environment Variable Support** - Configure via .env file
-✅ **Command Line Options** - Override settings per command
-✅ **Backward Compatibility** - Works with existing projects
-✅ **Laravel 10, 11, 12 Support** - Compatible with modern Laravel versions
+HTTP Client Generator - это инструмент для Laravel, который автоматизирует создание классов для работы с внешними HTTP API. Пакет генерирует полную структуру классов:
 
-## Installation
+- **Attribute классы** - для подготовки данных запроса
+- **Request классы** - для выполнения HTTP запросов
+- **Response классы** - для обработки успешных ответов
+- **BadResponse классы** - для обработки ошибок
+- **Factory классы** - для создания HTTP клиентов
+- **Test классы** - автоматические PHPUnit тесты для всех компонентов
 
-### Via VCS Repository (Recommended)
+## ✨ Основные возможности
 
-Add the following to your `composer.json`:
+- **🎯 Кастомные namespace**: Полная настройка структуры namespace под ваш проект
+- **📁 Гибкие пути**: Определение собственных путей для генерируемых файлов
+- **🧪 Автоматические тесты**: Генерация PHPUnit тестов для всех классов
+- **⚙️ Гибкая конфигурация**: Настройка через переменные окружения и конфиг файлы
+- **🔄 Обратная совместимость**: Работает с существующими паттернами Laravel HTTP client
+- **📦 Пакетная генерация**: Создание всех классов одной командой или по отдельности
+- **🎨 Кастомные шаблоны**: Возможность переопределения stub файлов
+
+## 📦 Установка и настройка
+
+### Установка через Composer
+
+Добавьте пакет в ваш Laravel проект:
 
 ```json
 {
     "require": {
-        "osddqd/http-client-generator-for-laravel": "^1.0"
+        "osddqd/http-client-generator-for-laravel": "dev-master"
     },
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/OSDDQD/http-client-generator-for-laravel.git"
+            "url": "https://github.com/osddqd/http-client-generator-for-laravel.git"
         }
     ]
 }
 ```
 
-Then run:
+Затем выполните:
 
 ```bash
 composer install
 ```
 
-### Publish Configuration
+### Публикация конфигурации
 
-Для публикации файла конфигурации используйте стандартную команду Laravel:
-
-```bash
-php artisan vendor:publish --provider="Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="config"
-```
-
-Это опубликует файл конфигурации в `config/http-client-generator.php`.
-
-Вы также можете опубликовать stub-файлы для кастомизации шаблонов:
+Для публикации файла конфигурации:
 
 ```bash
-php artisan vendor:publish --provider="Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="stubs"
+php artisan vendor:publish --provider="osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="config"
 ```
 
-## Configuration
+Для публикации stub-файлов (шаблонов):
 
-Пакет использует стандартный механизм Laravel для конфигурации. Конфигурация автоматически объединяется с настройками приложения, что позволяет переопределять только необходимые параметры.
-
-### Default Package Configuration
-
-Пакет предоставляет конфигурацию по умолчанию, которая автоматически загружается через `mergeConfigFrom()`. Это означает, что вы можете использовать пакет без публикации конфигурации, а опубликованный файл конфигурации будет содержать только те параметры, которые вы хотите переопределить.
-
-### Configuration File
-
-После публикации конфигурации (`vendor:publish --tag="config"`) вы получите файл:
-
-```php
-// config/http-client-generator.php
-<?php
-
-return [
-    'namespace' => [
-        'base' => 'App\\Http\\Clients',        // Base namespace
-        'attributes' => 'Attributes',          // Attributes subfolder
-        'requests' => 'Requests',              // Requests subfolder
-        'responses' => 'Responses',            // Responses subfolder
-        'factories' => 'Factories',            // Factories subfolder
-    ],
-
-    'paths' => [
-        'base' => 'app/Http/Clients',                    // Base path for classes
-        'tests' => 'tests/Unit/Http/Clients',           // Base path for tests
-    ],
-
-    'stubs' => [
-        'custom_path' => null,  // Path to custom stub files (optional)
-    ],
-
-    // Test generation settings
-    'generate_tests' => true,  // Generate tests by default (can be overridden with --no-tests)
-];
+```bash
+php artisan vendor:publish --provider="osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="stubs"
 ```
 
-**Важно:** Вы можете удалить из опубликованного файла конфигурации любые параметры, которые вас устраивают по умолчанию. Пакет автоматически объединит вашу конфигурацию с настройками по умолчанию.
+### Настройка переменных окружения
 
-### Partial Configuration Example
-
-Например, если вы хотите изменить только базовый namespace, ваш опубликованный файл конфигурации может содержать только:
-
-```php
-// config/http-client-generator.php
-<?php
-
-return [
-    'namespace' => [
-        'base' => 'App\\External\\Clients',
-    ],
-];
-```
-
-Все остальные настройки будут автоматически взяты из конфигурации пакета по умолчанию.
-
-### Environment Variables
+Добавьте в ваш `.env` файл:
 
 ```env
-# .env
-HTTP_CLIENT_GENERATOR_NAMESPACE=App\\External\\Clients
-HTTP_CLIENT_GENERATOR_PATH=app/External/Clients
-HTTP_CLIENT_GENERATOR_TESTS_PATH=tests/Unit/External/Clients
-HTTP_CLIENT_GENERATOR_STUBS_PATH=/path/to/custom/stubs
+# Базовый namespace для HTTP клиентов
+HTTP_CLIENT_GENERATOR_NAMESPACE=App\\Http\\Clients
 
-# Test generation settings
+# Путь для генерируемых классов
+HTTP_CLIENT_GENERATOR_PATH=app/Http/Clients
+
+# Путь для тестов
+HTTP_CLIENT_GENERATOR_TESTS_PATH=tests/Unit/Http/Clients
+
+# Автоматическая генерация тестов (по умолчанию true)
 HTTP_CLIENT_GENERATOR_GENERATE_TESTS=true
+
+# Кастомный путь к stub файлам (опционально)
+HTTP_CLIENT_GENERATOR_STUBS_PATH=/path/to/custom/stubs
 ```
 
-## Usage
+## 🚀 Быстрый старт
 
-### Basic Usage (Default Settings)
+### Создание всех классов одной командой
 
 ```bash
-# Generate attribute class
-php artisan http-client-generator:attribute Twitter Fetch
-
-# Generate request class  
-php artisan http-client-generator:request Twitter Fetch
-
-# Generate response class
-php artisan http-client-generator:response Twitter Fetch
-
-# Generate bad response class
-php artisan http-client-generator:bad-response Twitter
-
-# Generate factory class
-php artisan http-client-generator:factory Twitter Api
-
-# Generate all classes at once
-php artisan http-client-generator:all Twitter Fetch
+# Создание полного набора классов для работы с GitHub API
+php artisan http-client-generator:all GitHub GetUser
 ```
 
-### Test Generation Control
+Эта команда создаст:
+- `App\Http\Clients\GitHub\Attributes\GetUserAttribute`
+- `App\Http\Clients\GitHub\Requests\GetUserRequest`
+- `App\Http\Clients\GitHub\Responses\GetUserResponse`
+- `App\Http\Clients\GitHub\Responses\BadResponse`
+- `App\Http\Clients\GitHub\Factories\ApiFactory`
+- Соответствующие тесты в `tests/Unit/Http/Clients/GitHub/`
 
-By default, the package generates both classes and their corresponding test files. You can control this behavior:
+### Создание отдельных классов
 
 ```bash
-# Skip test generation for a single command
-php artisan http-client-generator:attribute Twitter Fetch --no-tests
+# Создание только класса атрибутов
+php artisan http-client-generator:attribute GitHub GetUser
 
-# Skip test generation for all classes
-php artisan http-client-generator:all Twitter Fetch --no-tests
+# Создание только класса запроса
+php artisan http-client-generator:request GitHub GetUser
 
-# Disable test generation globally in config
-# Set 'generate_tests' => false in config/http-client-generator.php
-# or HTTP_CLIENT_GENERATOR_GENERATE_TESTS=false in .env
+# Создание только класса ответа
+php artisan http-client-generator:response GitHub GetUser
+
+# Создание класса для обработки ошибок
+php artisan http-client-generator:bad-response GitHub
+
+# Создание фабрики
+php artisan http-client-generator:factory GitHub Api
 ```
 
-### With Custom Options
+### Пример использования сгенерированных классов
 
-```bash
-# Override namespace and paths
-php artisan http-client-generator:attribute Twitter Fetch \
-    --namespace="App\\External\\Clients" \
-    --path="app/External/Clients" \
-    --tests-path="tests/Unit/External/Clients"
-```
-
-### Example Output Structure
-
-With default configuration:
-```
-app/Http/Clients/Twitter/
-├── Attributes/
-│   └── FetchAttribute.php
-├── Requests/
-│   └── FetchRequest.php
-├── Responses/
-│   └── FetchResponse.php
-└── Factories/
-    └── FetchFactory.php
-
-tests/Unit/Http/Clients/Twitter/
-├── Attributes/
-│   └── FetchAttributeTest.php
-├── Requests/
-│   └── FetchRequestTest.php
-├── Responses/
-│   └── FetchResponseTest.php
-└── Factories/
-    └── FetchFactoryTest.php
-```
-
-With custom configuration:
-```
-app/External/Clients/Twitter/
-├── Attributes/
-│   └── FetchAttribute.php
-├── Requests/
-│   └── FetchRequest.php
-└── Responses/
-    └── FetchResponse.php
-```
-
-## Generated Classes Examples
-
-### Attribute Class
 ```php
 <?php
 
-namespace App\Http\Clients\Twitter\Attributes;
-
-class FetchAttribute
-{
-    public function __construct(
-        protected string $userId,
-        protected ?int $limit = null,
-    ) {}
-
-    public function toArray(): array
-    {
-        return [
-            'user_id' => $this->userId,
-            'limit' => $this->limit,
-        ];
-    }
-}
-```
-
-### Request Class
-```php
-<?php
-
-namespace App\Http\Clients\Twitter\Requests;
-
-use App\Http\Clients\Twitter\Attributes\FetchAttribute;
-use App\Http\Clients\Twitter\Responses\BadResponse;
-use App\Http\Clients\Twitter\Responses\FetchResponse;
+use App\Http\Clients\GitHub\Attributes\GetUserAttribute;
+use App\Http\Clients\GitHub\Requests\GetUserRequest;
 use Illuminate\Http\Client\Factory;
-use Illuminate\Http\Response;
 
-class FetchRequest
-{
-    public function __construct(public Factory $client) {}
+// Создание атрибутов запроса
+$attribute = new GetUserAttribute(
+    username: 'octocat'
+);
 
-    public function send(FetchAttribute $attribute): BadResponse|FetchResponse
-    {
-        $response = $this->client->get('users', $attribute->toArray());
+// Выполнение запроса
+$httpClient = app(Factory::class);
+$request = new GetUserRequest($httpClient);
+$response = $request->send($attribute);
 
-        if ($response->status() === Response::HTTP_OK) {
-            return FetchResponse::fromResponse($response);
-        }
-
-        return BadResponse::fromResponse($response);
-    }
+// Обработка ответа
+if ($response->success()) {
+    // Успешный ответ
+    $userData = $response->original->json();
+} else {
+    // Обработка ошибки
+    $errorMessage = $response->original->body();
 }
 ```
 
-## Available Commands
+## 🏗️ Структура проекта
 
-| Command | Description | Options |
-|---------|-------------|---------|
-| `http-client-generator:attribute` | Generate attribute class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
-| `http-client-generator:request` | Generate request class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
-| `http-client-generator:response` | Generate response class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
-| `http-client-generator:bad-response` | Generate bad response class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
-| `http-client-generator:factory` | Generate HTTP client factory class | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
-| `http-client-generator:all` | Generate all classes | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+После генерации классов ваш проект будет иметь следующую структуру:
 
-## Migration from Original Package
+```
+app/Http/Clients/
+├── GitHub/
+│   ├── Attributes/
+│   │   └── GetUserAttribute.php
+│   ├── Requests/
+│   │   └── GetUserRequest.php
+│   ├── Responses/
+│   │   ├── GetUserResponse.php
+│   │   └── BadResponse.php
+│   └── Factories/
+│       └── ApiFactory.php
+└── ...
 
-This package is fully backward compatible. To migrate:
-
-1. Update your `composer.json` to use this package
-2. Run `composer update`
-3. Optionally publish configuration file using `php artisan vendor:publish --provider="Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider" --tag="config"`
-
-All existing commands work exactly the same way.
-
-## Advanced Usage
-
-### Custom Stub Files
-
-You can create your own stub templates:
-
-1. Set `HTTP_CLIENT_GENERATOR_STUBS_PATH` in your `.env`
-2. Create custom `.stub` files in that directory
-3. Use the same placeholder syntax: `{{ namespace }}`, `{{ client }}`, `{{ name }}`
-
-### Integration with External APIs
-
-Perfect for creating organized HTTP clients for external services:
-
-```bash
-# CoinGecko API  
-php artisan http-client-generator:request CoinGecko GetPrice \
-    --namespace="App\\External\\CoinGecko" \
-    --path="app/External/CoinGecko"
+tests/Unit/Http/Clients/
+├── GitHub/
+│   ├── Attributes/
+│   │   └── GetUserAttributeTest.php
+│   ├── Requests/
+│   │   └── GetUserRequestTest.php
+│   ├── Responses/
+│   │   ├── GetUserResponseTest.php
+│   │   └── BadResponseTest.php
+│   └── Factories/
+│       └── ApiFactoryTest.php
+└── ...
 ```
 
+## 🔧 Доступные команды
 
-## Requirements
+### Команды генерации классов
+
+| Команда | Описание | Опции |
+|---------|----------|-------|
+| `http-client-generator:all` | Создать все классы сразу | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:attribute` | Создать класс атрибутов | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:request` | Создать класс запроса | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:response` | Создать класс ответа | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:bad-response` | Создать класс ошибки | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+| `http-client-generator:factory` | Создать фабрику | `--namespace`, `--path`, `--tests-path`, `--no-tests` |
+
+### Команды генерации тестов
+
+| Команда | Описание | Опции |
+|---------|----------|-------|
+| `http-client-generator:test:all` | Создать все тесты | `--test-namespace` |
+| `http-client-generator:test:attribute` | Создать тест атрибутов | `--test-namespace` |
+| `http-client-generator:test:request` | Создать тест запроса | `--test-namespace` |
+| `http-client-generator:test:response` | Создать тест ответа | `--test-namespace` |
+| `http-client-generator:test:bad-response` | Создать тест ошибки | `--test-namespace` |
+| `http-client-generator:test:factory` | Создать тест фабрики | `--test-namespace` |
+
+## 📚 Ссылки на документацию
+
+- **[EXAMPLES.md](EXAMPLES.md)** - Подробные примеры использования с комплексными сценариями
+
+## 🔧 Системные требования
 
 - PHP ^8.1
 - Laravel ^10.0|^11.0|^12.0
 
-## Credits
+## 📄 Лицензия
 
-- **Janez Cergolj** - Original package author
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE) for more information.
+MIT License. Подробности в файле [LICENSE](LICENSE).

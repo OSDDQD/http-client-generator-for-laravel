@@ -1,9 +1,9 @@
 <?php
 
-namespace Osddqd\HttpClientGenerator\Tests\Unit\Commands;
+namespace osddqd\HttpClientGenerator\Tests\Unit\Commands;
 
-use Osddqd\HttpClientGenerator\Console\Commands\CreateAttributeStubsCommand;
-use Osddqd\HttpClientGenerator\Tests\TestCase;
+use osddqd\HttpClientGenerator\Console\Commands\CreateAttributeStubsCommand;
+use osddqd\HttpClientGenerator\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
 class AttributeCommandTest extends TestCase

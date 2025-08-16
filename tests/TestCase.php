@@ -1,10 +1,10 @@
 <?php
 
-namespace Osddqd\HttpClientGenerator\Tests;
+namespace osddqd\HttpClientGenerator\Tests;
 
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider;
+use osddqd\HttpClientGenerator\HttpClientGeneratorServiceProvider;
 
 abstract class TestCase extends Orchestra
 {

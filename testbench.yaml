@@ -8,6 +8,9 @@ purge:
     - app/*
     - tests
     - temp_*
+    - storage/*
+    - bootstrap/cache/*.php
+    - custom
 
 workbench:
   start: '/'

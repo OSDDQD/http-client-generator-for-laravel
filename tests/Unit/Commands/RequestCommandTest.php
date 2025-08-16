@@ -1,9 +1,9 @@
 <?php
 
-namespace Osddqd\HttpClientGenerator\Tests\Unit\Commands;
+namespace osddqd\HttpClientGenerator\Tests\Unit\Commands;
 
-use Osddqd\HttpClientGenerator\Console\Commands\CreateRequestStubsCommand;
-use Osddqd\HttpClientGenerator\Tests\TestCase;
+use osddqd\HttpClientGenerator\Console\Commands\CreateRequestStubsCommand;
+use osddqd\HttpClientGenerator\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
 class RequestCommandTest extends TestCase

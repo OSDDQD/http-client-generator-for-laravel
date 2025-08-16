@@ -1,6 +1,6 @@
 <?php
 
-namespace Osddqd\HttpClientGenerator\Console\Commands;
+namespace osddqd\HttpClientGenerator\Console\Commands;
 
 use function Laravel\Prompts\text;
 
@@ -12,6 +12,7 @@ class CreateResponseStubsCommand extends AppCommand
         {--namespace= : Custom base namespace}
         {--path= : Custom base path}
         {--tests-path= : Custom tests path}
+        {--test-namespace= : Custom namespace for tests}
         {--no-tests : Skip test generation}';
 
     protected $description = 'Command for generating response classes with custom namespace and path support';

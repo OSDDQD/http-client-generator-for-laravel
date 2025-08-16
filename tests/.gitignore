@@ -1,0 +1,39 @@
+# Workbench - ignore everything first, then selectively include
+workbench/*
+
+# Include basic structure
+!workbench/app/
+!workbench/bootstrap/
+!workbench/database/
+!workbench/resources/
+!workbench/routes/
+!workbench/storage/
+
+# Include bootstrap/cache folder but ignore all PHP files
+!workbench/bootstrap/cache/
+workbench/bootstrap/cache/*.php
+
+# Include database structure
+!workbench/database/factories/
+!workbench/database/factories/UserFactory.php
+!workbench/database/migrations/
+!workbench/database/seeders/
+!workbench/database/seeders/DatabaseSeeder.php
+
+# Include resources structure
+!workbench/resources/views/
+
+# Include routes
+!workbench/routes/console.php
+!workbench/routes/web.php
+
+# Ignore generated content in storage but keep the folder
+workbench/storage/*
+
+# Ignore generated content in other areas
+workbench/vendor/
+workbench/app/Http/Clients/*
+workbench/tests/*
+
+# Keep .gitkeep files if they exist
+!**/.gitkeep
